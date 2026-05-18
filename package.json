@@ -1,0 +1,29 @@
+{
+  "name": "benchmark-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anphonicai/benchmark-backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/anphonicai/benchmark-backend/issues"
+  },
+  "homepage": "https://github.com/anphonicai/benchmark-backend#readme",
+  "dependencies": {
+    "airtable": "^0.12.2",
+    "body-parser": "^2.2.2",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "node-fetch": "^3.3.2",
+    "pg": "^8.21.0"
+  }
+}
