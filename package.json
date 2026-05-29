@@ -1,16 +1,23 @@
 {
   "name": "benchmark-backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Express backend for benchmark app with PostgreSQL, Shopify integration, lead capture, and benchmark scoring APIs.",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/anphonicai/benchmark-backend.git"
   },
-  "keywords": [],
+  "keywords": [
+    "express",
+    "postgresql",
+    "shopify",
+    "benchmark",
+    "api"
+  ],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
@@ -19,8 +26,8 @@
   },
   "homepage": "https://github.com/anphonicai/benchmark-backend#readme",
   "dependencies": {
-    "airtable": "^0.12.2",
     "body-parser": "^2.2.2",
+    "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "node-fetch": "^3.3.2",
