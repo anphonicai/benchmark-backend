@@ -25,8 +25,28 @@ function ResultsPage() {
       setLoading(true);
       setError('');
       try {
-        const response = await getReport();
-        setReport(response.data);
+        // Fetch report summary + category data, and metrics (brands)
+        const [reportRes, metricsRes] = await Promise.all([getReport(), getMetrics()]);
+
+        const reportData = reportRes.data || {};
+        const metricsData = metricsRes.data || {};
+
+        // Normalize shapes expected by this UI
+        const summary = reportData.report_summary || reportData.summary || null;
+        const categories = reportData.report_by_category || reportData.categories || [];
+
+        // Map metrics rows to brands list used in the table
+        const brands = (metricsData.metrics || metricsData.rows || []).map((m) => ({
+          id: m.company_id || m.id,
+          brand_name: m.brand_name || m.name || m.company_name || '--',
+          category: m.category,
+          repeat_rate: m.repeat_rate,
+          average_order_value: m.average_order_value || m.aov || '--',
+          repeat_percentile: m.cohort_percentile ? m.cohort_percentile / 100 : (m.cohort_percentile || 0),
+          performance_verdict: m.verdict?.headline || m.shelf_score || '--',
+        }));
+
+        setReport({ summary, categories, brands });
       } catch (err) {
         setError(err.response?.data?.error || err.message || 'Unable to load report');
       } finally {

@@ -1,5 +1,6 @@
 const express = require('express');
 const pool = require('../db/connection');
+const { computeShelfScore, computePercentile, computeVerdict, scoreBrand } = require('./scoring');
 const { fetchShopifyMetrics, fetchShopifyQL } = require('./shopify');
 
 const router = express.Router();
@@ -36,6 +37,11 @@ const normalizeManualMetrics = (body) => {
     addToCartRate,
     revenueFromRepeat,
     ordersPerMonth,
+    repeatRate90dPct: parseNumber(body.repeat_rate_90d_pct),
+    repeatRevenuePct: parseNumber(body.repeat_revenue_pct),
+    timeTo2ndOrderDaysMedian: parseNumber(body.time_to_2nd_order_days_median),
+    rebuyRevenueSharePct: parseNumber(body.rebuy_revenue_share_pct),
+    personalisationAovLiftPct: parseNumber(body.personalisation_aov_lift_pct),
   };
 };
 
@@ -264,15 +270,9 @@ router.post('/shopifyql', async (req, res) => {
 // POST /api/companies/benchmark/manual
 router.post('/benchmark/manual', async (req, res) => {
   console.log('manual benchmark route hit');
-  const required = requireFields(req.body, ['company_name', 'total_revenue', 'total_orders', 'total_customers']);
-  if (required) {
-    return res.status(400).json({
-      success: false,
-      message: `Missing required fields: ${required.join(', ')}`,
-    });
-  }
-
+  
   const {
+    company_id,
     company_name,
     website,
     tier,
@@ -282,58 +282,88 @@ router.post('/benchmark/manual', async (req, res) => {
     cluster,
     category,
     shopify_store_url,
+    repeat_rate_90d_pct,
+    repeat_revenue_pct,
+    time_to_2nd_order_days_median,
+    rebuy_revenue_share_pct,
+    personalisation_aov_lift_pct,
+    loyalty,
+    postPurchaseUpsell,
+    whatsappTool,
   } = req.body;
 
-  const {
-    totalRevenue,
-    totalOrders,
-    totalCustomers,
-    repeatCustomers,
-    averageOrderValue,
-    repeatRate,
-    addToCartRate,
-    revenueFromRepeat,
-    ordersPerMonth,
-  } = normalizeManualMetrics(req.body);
-
-  if (totalRevenue === null || totalOrders === null || totalCustomers === null) {
+  // Require either an existing companyId or a brand name to create one
+  if (!company_id && !company_name) {
     return res.status(400).json({
       success: false,
-      message: 'Invalid numeric values for total_revenue, total_orders, or total_customers',
+      message: 'Missing required field: company_name',
     });
   }
 
-  const safeAverageOrderValue = averageOrderValue !== null
-    ? averageOrderValue
-    : totalOrders > 0 ? Number((totalRevenue / totalOrders).toFixed(2)) : 0;
+  // Check if cohort metrics are provided
+  const hasCohortMetrics = [
+    repeat_rate_90d_pct,
+    repeat_revenue_pct,
+    time_to_2nd_order_days_median,
+    rebuy_revenue_share_pct,
+    personalisation_aov_lift_pct,
+  ].some((val) => val !== null && val !== undefined && val !== '');
 
-  const safeRepeatRate = repeatRate !== null
-    ? repeatRate
-    : totalCustomers > 0 ? Number(((repeatCustomers || 0) / totalCustomers) * 100) : 0;
-
-  const shelfScore = ordersPerMonth !== null
-    ? Number((((safeRepeatRate || 0) * 50) + ((addToCartRate || 0) * 30) + (ordersPerMonth / 100)).toFixed(2))
-    : null;
+  if (!hasCohortMetrics) {
+    return res.status(400).json({
+      success: false,
+      message: 'Please provide at least one metric: repeat_rate_90d_pct, repeat_revenue_pct, time_to_2nd_order_days_median, rebuy_revenue_share_pct, or personalisation_aov_lift_pct',
+    });
+  }
 
   try {
-    const companyResult = await pool.query(
-      `INSERT INTO companies (company_name, website, tier, contact_name, contact_email, phone, cluster, category, shopify_store_url)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-       ON CONFLICT (shopify_store_url) DO UPDATE SET
-         company_name = EXCLUDED.company_name,
-         website = EXCLUDED.website,
-         tier = EXCLUDED.tier,
-         contact_name = EXCLUDED.contact_name,
-         contact_email = EXCLUDED.contact_email,
-         phone = EXCLUDED.phone,
-         cluster = EXCLUDED.cluster,
-         category = EXCLUDED.category
-       RETURNING id`,
-      [company_name, website, tier, contact_name, contact_email, phone, cluster, category, shopify_store_url]
-    );
+    let companyId = company_id ? Number(company_id) : null;
 
-    const companyId = companyResult.rows[0].id;
+    // Only insert a new company if we don't already have one from BrandInfoPage
+    if (!companyId) {
+      const companyResult = await pool.query(
+        `INSERT INTO companies (company_name, website, tier, contact_name, contact_email, phone, cluster, category, shopify_store_url)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+         ON CONFLICT (shopify_store_url) DO UPDATE SET
+           company_name = EXCLUDED.company_name,
+           website = EXCLUDED.website,
+           tier = EXCLUDED.tier,
+           contact_name = EXCLUDED.contact_name,
+           contact_email = EXCLUDED.contact_email,
+           phone = EXCLUDED.phone,
+           cluster = EXCLUDED.cluster,
+           category = EXCLUDED.category
+         RETURNING id`,
+        [company_name, website, tier, contact_name, contact_email, phone, cluster, category, shopify_store_url]
+      );
+      companyId = companyResult.rows[0].id;
+    }
 
+    // Build metrics payload for scoreBrand
+    const metrics = {
+      repeat_rate_90d_pct: parseNumber(repeat_rate_90d_pct),
+      repeat_revenue_pct: parseNumber(repeat_revenue_pct),
+      time_to_2nd_order_days_median: parseNumber(time_to_2nd_order_days_median),
+      rebuy_revenue_share_pct: parseNumber(rebuy_revenue_share_pct),
+      personalisation_aov_lift_pct: parseNumber(personalisation_aov_lift_pct),
+    };
+
+    // Build manual inputs for gap analysis
+    const manualInputs = {
+      loyalty: loyalty || null,
+      upsell: postPurchaseUpsell || null,
+      whatsapp: whatsappTool || null,
+    };
+
+    // Call scoreBrand for full report
+    const scoreResult = scoreBrand({
+      metrics,
+      manualInputs,
+      category: category || 'overall',
+      brandContext: {},
+    });
+
+    // Insert metrics record
     const metricsResult = await pool.query(
       `INSERT INTO metrics (
          company_id,
@@ -345,20 +375,22 @@ router.post('/benchmark/manual', async (req, res) => {
          repeat_rate,
          add_to_cart_rate,
          revenue_from_repeat,
-         shelf_score
-       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+         shelf_score,
+         cohort_percentile
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
        RETURNING id`,
       [
         companyId,
-        totalRevenue,
-        totalOrders,
-        totalCustomers,
-        repeatCustomers,
-        safeAverageOrderValue,
-        safeRepeatRate,
-        addToCartRate,
-        revenueFromRepeat,
-        shelfScore,
+        0, // total_revenue: default to 0
+        0, // total_orders: default to 0
+        0, // total_customers: default to 0
+        0, // repeat_customers: default to 0
+        0, // average_order_value: default to 0
+        0, // repeat_rate: default to 0
+        0, // add_to_cart_rate: default to 0
+        0, // revenue_from_repeat: default to 0
+        scoreResult.shelf_score,
+        scoreResult.percentile,
       ]
     );
 
@@ -366,16 +398,15 @@ router.post('/benchmark/manual', async (req, res) => {
       success: true,
       companyId,
       metricsId: metricsResult.rows[0].id,
-      report: {
-        total_revenue: totalRevenue,
-        total_orders: totalOrders,
-        total_customers: totalCustomers,
-        repeat_customers: repeatCustomers,
-        repeat_rate: safeRepeatRate,
-        average_order_value: safeAverageOrderValue,
-        category_breakdown: [],
-        customer_cohorts: [],
-        shelf_score: shelfScore,
+      ...scoreResult,
+      input: {
+        company_name,
+        category,
+        repeat_rate_90d_pct,
+        repeat_revenue_pct,
+        time_to_2nd_order_days_median,
+        rebuy_revenue_share_pct,
+        personalisation_aov_lift_pct,
       },
     });
   } catch (error) {
@@ -442,6 +473,80 @@ router.get('/metrics', async (req, res) => {
   } catch (error) {
     console.error('Error retrieving metrics:', error.message);
     res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+});
+
+// POST /api/companies/brand-info - Store brand info from step 01 (BrandInfoPage)
+router.post('/brand-info', async (req, res) => {
+  console.log('POST /api/companies/brand-info hit');
+  
+  const {
+    fullName,
+    role,
+    email,
+    phone,
+    brandName,
+    shopifyUrl,
+    category,
+    ordersPerMonth,
+  } = req.body;
+
+  // Validate required fields
+  if (!email || !brandName) {
+    return res.status(400).json({
+      success: false,
+      message: 'Missing required fields: email and brandName are required',
+    });
+  }
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO companies (company_name, website, tier, contact_name, contact_email, phone, cluster, category, shopify_store_url)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       ON CONFLICT (shopify_store_url) DO UPDATE SET
+         company_name = EXCLUDED.company_name,
+         contact_name = EXCLUDED.contact_name,
+         contact_email = EXCLUDED.contact_email,
+         phone = EXCLUDED.phone,
+         category = EXCLUDED.category,
+         updated_at = NOW()
+       RETURNING id`,
+      [
+        brandName, // company_name
+        null, // website
+        role || null, // tier (storing role here temporarily)
+        fullName || null, // contact_name
+        email, // contact_email
+        phone || null, // phone
+        null, // cluster
+        category || null, // category
+        shopifyUrl || null, // shopify_store_url
+      ]
+    );
+
+    const companyId = result.rows[0].id;
+
+    return res.status(201).json({
+      success: true,
+      companyId,
+      message: 'Brand info saved successfully',
+      data: {
+        fullName,
+        role,
+        email,
+        phone,
+        brandName,
+        shopifyUrl,
+        category,
+        ordersPerMonth,
+      },
+    });
+  } catch (error) {
+    console.error('Error saving brand info:', error.message);
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 });
 

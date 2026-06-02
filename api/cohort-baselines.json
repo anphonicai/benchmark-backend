@@ -1,0 +1,212 @@
+{
+  "_metadata": {
+    "source": "The Shelf Index, Edition 01, Anphonic, 2026",
+    "cohort_size": 13,
+    "extraction_date": "2026-05-17",
+    "extracted_from": "Final_version_-_Shel_Life_Report.html",
+    "currency": "INR",
+    "window_days": 90,
+    "notes": [
+      "All numbers are anonymized cohort statistics from 13 India D2C brands using Rebuy Engine on Shopify.",
+      "1 UAE brand excluded from INR-denominated averages.",
+      "1 brand excluded from revenue-share calculations due to B2B/wholesale contamination.",
+      "4 brands excluded from personalisation lift averages due to AOV inversions.",
+      "Categories with insufficient cohort size (<3 brands) fall back to 'overall'."
+    ]
+  },
+  "overall": {
+    "repeat_rate_90d_pct": {
+      "median": 13,
+      "top_quartile": 26,
+      "max_observed": 33,
+      "source": "Cohort average ~13%; top performers run 26-33%."
+    },
+    "time_to_2nd_order_days": {
+      "median": 21,
+      "top_quartile": 14,
+      "source": "50.7% of repeat buyers return by day 21; 37.7% by day 14."
+    },
+    "repeat_revenue_pct": {
+      "median": 40,
+      "top_quartile": 64,
+      "max_observed": 66,
+      "source": "Returning customer revenue share across cohort: 12% to 66%."
+    },
+    "returning_aov_premium_pct": {
+      "median": 24,
+      "top_quartile": 36,
+      "source": "Returning customers spend 24% more per order on average."
+    },
+    "rebuy_revenue_share_pct": {
+      "median": 15.8,
+      "top_quartile": 22.7,
+      "max_observed": 28.5,
+      "min_observed": 2.8,
+      "target_range_low": 12,
+      "target_range_high": 18,
+      "source": "Portfolio average 15.8%; range 2.8% to 28.5%; target 12-18%."
+    },
+    "ltv_2_order_multiplier": {
+      "median": 2.1,
+      "top_quartile": 2.2,
+      "source": "2-order customers worth 1.9x to 2.2x single-order customers."
+    },
+    "ltv_3_order_multiplier": {
+      "median": 3.3,
+      "top_quartile": 3.9
+    },
+    "ltv_4plus_multiplier": {
+      "median": 5.7,
+      "top_quartile": 7.0
+    },
+    "personalisation_aov_lift_pct": {
+      "median": 51,
+      "top_quartile": 77,
+      "max_observed": 92.8,
+      "source": "Average +51% AOV lift on personalised orders; range +16.3% to +92.8%."
+    }
+  },
+  "food_beverage": {
+    "_label": "Food & Beverage",
+    "_brand_count_in_cohort": 5,
+    "repeat_rate_90d_pct": {
+      "median": 15,
+      "top_quartile": 15.6,
+      "source": "Coffee/beverages India avg ~15%, top 15.6%."
+    },
+    "repeat_revenue_pct": {
+      "median": 48,
+      "top_quartile": 61,
+      "source": "Coffee concentrate 48%, beverage 40%, staples 61%."
+    },
+    "time_to_2nd_order_days": {
+      "median": 21,
+      "top_quartile": 14
+    },
+    "rebuy_revenue_share_pct": {
+      "median": 18.7,
+      "top_quartile": 22.7,
+      "source": "Range 13.5% (coffee concentrate) to 22.7% (staples)."
+    },
+    "personalisation_aov_lift_pct": {
+      "median": 56.5,
+      "top_quartile": 92.8,
+      "source": "Coffee concentrate +56.5%, staples +92.8%, condiment +65.8%."
+    },
+    "global_benchmark_repeat_rate_pct": {
+      "low": 20,
+      "high": 35,
+      "source": "Global: Coffee/beverages 25-35%, Food staples 20-30%."
+    }
+  },
+  "health_nutrition": {
+    "_label": "Health & Nutrition",
+    "_brand_count_in_cohort": 5,
+    "repeat_rate_90d_pct": {
+      "median": 13,
+      "top_quartile": 26.3,
+      "max_observed": 33,
+      "source": "Protein/sports nutrition India avg ~24%, top 26.3%. Health supplements India avg ~13%, top 15.6%."
+    },
+    "repeat_revenue_pct": {
+      "median": 49,
+      "top_quartile": 66,
+      "source": "Protein 66%, Wellness 64%, Superfood 32%, Nutrition supplement 33%."
+    },
+    "time_to_2nd_order_days": {
+      "median": 21,
+      "top_quartile": 14
+    },
+    "returning_aov_premium_pct": {
+      "median": 27,
+      "top_quartile": 36,
+      "source": "Health & Nutrition returning AOV premium +18% to +36%."
+    },
+    "rebuy_revenue_share_pct": {
+      "median": 14.7,
+      "top_quartile": 17.9,
+      "source": "Range 6.8% (wellness) to 17.9% (superfood)."
+    },
+    "personalisation_aov_lift_pct": {
+      "median": 26.6,
+      "top_quartile": 76.6,
+      "source": "Nutrition supplement +76.6%, superfood +51.5%, health supplement +26.6%, wellness +22.7%."
+    },
+    "global_benchmark_repeat_rate_pct": {
+      "low": 30,
+      "high": 45,
+      "source": "Global: Protein 35-45%, Health supplements 30-40%."
+    }
+  },
+  "beauty_personal_care": {
+    "_label": "Beauty & Personal Care",
+    "_brand_count_in_cohort": 0,
+    "_fallback_to": "overall",
+    "_note": "Insufficient cohort data in Edition 01. Falls back to overall benchmarks until Edition 02."
+  },
+  "wellness_supplements": {
+    "_label": "Wellness & Supplements",
+    "_brand_count_in_cohort": 3,
+    "_inherits_from": "health_nutrition",
+    "_note": "Mapped to Health & Nutrition cohort for Edition 01."
+  },
+  "apparel_accessories": {
+    "_label": "Apparel & Accessories",
+    "_brand_count_in_cohort": 0,
+    "_fallback_to": "overall",
+    "_note": "Insufficient cohort data in Edition 01. Falls back to overall benchmarks."
+  },
+  "home_lifestyle": {
+    "_label": "Home & Lifestyle",
+    "_brand_count_in_cohort": 0,
+    "_fallback_to": "overall",
+    "_note": "Insufficient cohort data in Edition 01. Falls back to overall benchmarks."
+  },
+  "pet": {
+    "_label": "Pet",
+    "_brand_count_in_cohort": 0,
+    "_fallback_to": "overall",
+    "_note": "Insufficient cohort data in Edition 01. Falls back to overall benchmarks."
+  },
+  "_scoring_weights": {
+    "_note": "Weights used by computeShelfScore() to produce 0-100 composite score. Sum to 1.0.",
+    "repeat_rate_90d_pct": 0.3,
+    "repeat_revenue_pct": 0.25,
+    "time_to_2nd_order_days": 0.15,
+    "rebuy_revenue_share_pct": 0.2,
+    "personalisation_aov_lift_pct": 0.1
+  },
+  "_gap_revenue_estimates": {
+    "_note": "Default uplift assumptions used by gap revenue-at-stake calculator. All conservative.",
+    "missing_reorder_page": {
+      "metric": "repeat_revenue_pct",
+      "estimated_uplift_pct": 8,
+      "rationale": "Most common priority gap. Reorder Page is the #1 missing feature; brands that ship it see 8-12% lift in repeat revenue share."
+    },
+    "missing_loyalty_program": {
+      "metric": "repeat_rate_90d_pct",
+      "estimated_uplift_points": 7,
+      "rationale": "Loyalty programs (Nector, POPcoins) lift 90-day repeat rate by ~7 points in similar cohorts."
+    },
+    "missing_post_purchase_upsell": {
+      "metric": "aov_inr",
+      "estimated_uplift_pct": 10,
+      "rationale": "Post-purchase Rebuy Smart Cart and upsell flows lift AOV 8-12% when properly configured."
+    },
+    "missing_whatsapp_optin": {
+      "metric": "repeat_revenue_pct",
+      "estimated_uplift_pct": 12,
+      "rationale": "Day-21 WhatsApp reorder URL flow captures 12-22% of repeat revenue at top quartile brands."
+    },
+    "underutilised_rebuy": {
+      "metric": "rebuy_revenue_share_pct",
+      "estimated_uplift_points": 7,
+      "rationale": "Moving from below-target Rebuy share (<12%) to portfolio average (15.8%) adds ~7 percentage points of store revenue from personalisation."
+    },
+    "missing_fbt_pdp": {
+      "metric": "aov_inr",
+      "estimated_uplift_pct": 6,
+      "rationale": "Frequently Bought Together on PDPs adds 5-8% AOV when natural product pairings exist (which they do for 80%+ of brands per cohort data)."
+    }
+  }
+}

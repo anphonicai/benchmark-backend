@@ -1,0 +1,26 @@
+# Backend dependencies (re-installed in Docker)
+node_modules
+
+# Frontend dependencies and build artifacts (rebuilt in Docker)
+Multi-page client data form/node_modules
+Multi-page client data form/dist
+
+# Local build output (replaced by Docker build)
+client
+benchmark-frontend
+
+# Environment and secrets
+.env
+.env.*
+
+# Git and editor
+.git
+.gitignore
+*.log
+.DS_Store
+
+# Docs
+README.md
+IMPORT.md
+TESTING_GUIDE.md
+SHOPIFYQL_BENCHMARK_WORKFLOW.md

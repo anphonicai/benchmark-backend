@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const pool = require('./db/connection');
 const { fetchShopifyMetrics } = require('./api/shopify');
+const { scoreBrand } = require('./api/scoring');
 
 dotenv.config();
 
@@ -30,70 +31,90 @@ app.get('/health', (req, res) => {
   res.status(200).json({ message: 'Server is running' });
 });
 
-// Root endpoint
-app.get('/', (req, res) => {
-  res.status(200).json({
-    message: 'Benchmark Backend API',
-    version: '1.0.0',
-    endpoints: {
-      health: '/health',
-      companies: '/api/companies',
-      benchmarkManual: 'POST /api/companies/benchmark/manual',
-      benchmarkReport: 'GET /api/companies/benchmark/:companyId',
-      metrics: 'GET /api/companies/metrics',
-    },
-  });
-});
-
 // Connect the company routes to the base endpoint `/api/companies`
 app.use('/api/companies', companyRoutes);
 
 // POST /manual - Calculate shelf score from manual input
 app.post('/manual', (req, res) => {
   const {
-    average_order_value,
-    repeat_rate,
-    add_to_cart_rate,
-    percent_repeat_revenue,
-    orders_per_month,
+    repeat_rate_90d_pct,
+    repeat_revenue_pct,
+    time_to_2nd_order_days_median,
+    rebuy_revenue_share_pct,
+    personalisation_aov_lift_pct,
+    category,
+    loyalty,
+    upsell,
+    whatsapp,
+    aov_inr,
+    orders_per_month_estimated,
   } = req.body;
 
-  // Validate required fields
-  if (isEmpty(average_order_value) || isEmpty(repeat_rate) || isEmpty(add_to_cart_rate) || isEmpty(orders_per_month)) {
+  // Validate required scoring metrics
+  const metrics = {
+    repeat_rate_90d_pct: parseNumber(repeat_rate_90d_pct, null),
+    repeat_revenue_pct: parseNumber(repeat_revenue_pct, null),
+    time_to_2nd_order_days_median: parseNumber(time_to_2nd_order_days_median, null),
+    rebuy_revenue_share_pct: parseNumber(rebuy_revenue_share_pct, null),
+    personalisation_aov_lift_pct: parseNumber(personalisation_aov_lift_pct, null),
+  };
+
+  const hasAllRequiredMetrics = Object.values(metrics).every(
+    (value) => value !== null && value !== undefined && !Number.isNaN(value)
+  );
+
+  if (!hasAllRequiredMetrics) {
     return res.status(400).json({
-      error: 'Required fields are: average_order_value, repeat_rate, add_to_cart_rate, orders_per_month',
+      error: 'Required fields: repeat_rate_90d_pct, repeat_revenue_pct, time_to_2nd_order_days_median, rebuy_revenue_share_pct, personalisation_aov_lift_pct',
     });
   }
 
-  // Parse and calculate values
-  const repeatRate = parseNumber(repeat_rate);
-  const addToCartRate = parseNumber(add_to_cart_rate);
-  const orderCount = parseNumber(orders_per_month);
-  const avgOrderValue = parseNumber(average_order_value);
-  const percentRepeatRevenue = parseNumber(percent_repeat_revenue, 0);
+  // Manual inputs for gap identification
+  const manualInputs = {
+    loyalty: loyalty || null,
+    upsell: upsell || null,
+    whatsapp: whatsapp || null,
+  };
 
-  const normalizedAOV = avgOrderValue / 100;
-  const normalizedOrders = orderCount / 10;
-  const shelf_score = Number(
-    (
-      (normalizedAOV + repeatRate + addToCartRate + percentRepeatRevenue + normalizedOrders) /
-      5
-    ).toFixed(2)
-  );
+  // Brand context for revenue-at-stake estimation
+  const brandContext = {
+    aov_inr: parseNumber(aov_inr, null),
+    orders_per_month_estimated: parseNumber(orders_per_month_estimated, null),
+  };
 
-  // Respond with the shelf score and its calculation breakdown
-  return res.status(200).json({
-    success: true,
-    shelf_score,
-    input: {
-      average_order_value: avgOrderValue,
-      repeat_rate: repeatRate,
-      add_to_cart_rate: addToCartRate,
-      percent_repeat_revenue: percentRepeatRevenue,
-      orders_per_month: orderCount,
-    },
-    formula: 'shelf_score = average of normalized inputs: average_order_value/100, repeat_rate, add_to_cart_rate, percent_repeat_revenue, orders_per_month/10',
-  });
+  try {
+    // Call the main scoring engine with all inputs
+    const result = scoreBrand({
+      metrics,
+      manualInputs,
+      category: category || 'overall',
+      brandContext,
+    });
+
+    return res.status(200).json({
+      success: true,
+      ...result,
+      input: {
+        repeat_rate_90d_pct,
+        repeat_revenue_pct,
+        time_to_2nd_order_days_median,
+        rebuy_revenue_share_pct,
+        personalisation_aov_lift_pct,
+        category,
+        loyalty,
+        upsell,
+        whatsapp,
+        aov_inr,
+        orders_per_month_estimated,
+      },
+    });
+  } catch (error) {
+    console.error('Error calculating shelf score:', error.message);
+    return res.status(500).json({
+      error: 'Failed to calculate shelf score',
+      details: error.message,
+    });
+  }
 });
 
 // Get /metrics
@@ -174,18 +195,17 @@ app.get('/report', async (req, res) => {
   }
 });
 
-// Serve frontend build if it exists
-const frontendBuildPath = path.join(__dirname, 'benchmark-frontend', 'build');
+// Serve the Vite frontend build (outputs to client/ via vite.config.ts outDir)
+const frontendBuildPath = path.join(__dirname, 'client');
 if (fs.existsSync(path.join(frontendBuildPath, 'index.html'))) {
   app.use(express.static(frontendBuildPath));
 
-  app.get('*', (req, res, next) => {
+  app.get(/.*/, (req, res, next) => {
     if (
       req.path.startsWith('/api') ||
       req.path === '/health' ||
       req.path === '/metrics' ||
-      req.path === '/report' ||
-      req.path === '/manual'
+      req.path === '/report'
     ) {
       return next();
     }
