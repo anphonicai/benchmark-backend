@@ -133,8 +133,15 @@ export function loadBenchmarkData(): BenchmarkData | null {
         }))
       : sampleBenchmarkData.gaps;
 
-    const metrics: MetricRow[] = Array.isArray(report.metrics_vs_cohort)
-      ? report.metrics_vs_cohort.map((m: any) => {
+    // Filter out rebuy and personalisation metrics (removed from scoring)
+    const filteredMetrics = Array.isArray(report.metrics_vs_cohort)
+      ? report.metrics_vs_cohort.filter((m: any) =>
+          !['rebuy_revenue_share_pct', 'personalisation_aov_lift_pct', 'repeat_rate_90d_pct'].includes(m.key)
+        )
+      : [];
+
+    const metrics: MetricRow[] = filteredMetrics.length > 0
+      ? filteredMetrics.map((m: any) => {
           const youRaw = m.you ?? null;
           const medianRaw = m.cohort_median ?? null;
           const topQRaw = m.top_quartile ?? null;
@@ -157,6 +164,9 @@ export function loadBenchmarkData(): BenchmarkData | null {
         })
       : sampleBenchmarkData.metrics;
 
+    // Also filter out rebuy/personalisation from gaps (old localStorage safety net)
+    const filteredGaps = gaps.filter((g) => g.id !== 'underutilised_rebuy');
+
     const totalRevenueAtStake = report.total_revenue_at_stake_inr
       ? `₹${(report.total_revenue_at_stake_inr / 100000).toFixed(1)}L`
       : sampleBenchmarkData.totalRevenueAtStake;
@@ -168,7 +178,7 @@ export function loadBenchmarkData(): BenchmarkData | null {
       percentile,
       verdictTitle: report.verdict?.headline ?? sampleBenchmarkData.verdictTitle,
       verdictDescription: report.verdict?.cohort_comparison ?? sampleBenchmarkData.verdictDescription,
-      gaps,
+      gaps: filteredGaps,
       totalRevenueAtStake,
       metrics,
       cohortSize: report.methodology?.cohort_size ?? sampleBenchmarkData.cohortSize,

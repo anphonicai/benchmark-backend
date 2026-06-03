@@ -212,20 +212,12 @@ export default function BenchmarkReportPage() {
   }, []);
 
   const winningMetrics = data.metrics.filter((m) => m.status === 'up');
-  const quickWins = data.gaps.filter((g) => (GAP_META[g.id]?.effort === 'Low'));
-  const growthPlays = data.gaps.filter((g) => (GAP_META[g.id]?.effort !== 'Low'));
 
   return (
     <div className="min-h-screen bg-[#f8f6f3] print:bg-white">
       {/* Header */}
-      <header className="px-12 py-6 flex items-center justify-between print:hidden">
+      <header className="px-12 py-6 print:hidden">
         <Logo />
-        <button
-          onClick={() => window.print()}
-          className="inline-flex items-center gap-2 bg-[#1a1a1a] text-white px-5 py-2.5 rounded-lg hover:bg-[#333] transition-colors text-sm"
-        >
-          ↓ Download PDF
-        </button>
       </header>
 
       <main className="px-12 py-10 max-w-5xl mx-auto print:px-4 print:py-4">
@@ -397,52 +389,6 @@ export default function BenchmarkReportPage() {
           </div>
         </div>
 
-        {/* ── 5. ACTION ROADMAP ── */}
-        {(quickWins.length > 0 || growthPlays.length > 0) && (
-          <div className="bg-white rounded-2xl p-10 mb-6 shadow-sm">
-            <h2 className="text-2xl mb-6">Your Action Roadmap</h2>
-            <div className="grid grid-cols-2 gap-8">
-              {quickWins.length > 0 && (
-                <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="w-2 h-2 rounded-full bg-green-500" />
-                    <h3 className="font-semibold text-green-700">Quick Wins — Start This Week</h3>
-                  </div>
-                  <div className="space-y-3">
-                    {quickWins.map((g, i) => (
-                      <div key={i} className="flex items-start gap-3 text-sm">
-                        <span className="w-5 h-5 rounded-full bg-green-100 text-green-700 text-xs flex items-center justify-center font-bold flex-shrink-0 mt-0.5">{i + 1}</span>
-                        <div>
-                          <div className="font-medium text-[#1a1a1a]">{g.title}</div>
-                          <div className="text-[#999] text-xs mt-0.5">{GAP_META[g.id]?.time} · {g.revenueAtStake} opportunity</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {growthPlays.length > 0 && (
-                <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="w-2 h-2 rounded-full bg-yellow-500" />
-                    <h3 className="font-semibold text-yellow-700">Growth Plays — Next 30 Days</h3>
-                  </div>
-                  <div className="space-y-3">
-                    {growthPlays.map((g, i) => (
-                      <div key={i} className="flex items-start gap-3 text-sm">
-                        <span className="w-5 h-5 rounded-full bg-yellow-100 text-yellow-700 text-xs flex items-center justify-center font-bold flex-shrink-0 mt-0.5">{i + 1}</span>
-                        <div>
-                          <div className="font-medium text-[#1a1a1a]">{g.title}</div>
-                          <div className="text-[#999] text-xs mt-0.5">{GAP_META[g.id]?.time} · {g.revenueAtStake} opportunity</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
 
         {/* ── 6. METHODOLOGY ── */}
         <div className="bg-white rounded-2xl p-8 mb-6 shadow-sm">
