@@ -241,10 +241,7 @@ export default function BrandInfoPage() {
               >
                 <option value="">Select category</option>
                 <option value="Food & Beverage">Food & Beverage</option>
-                <option value="Beauty & Personal Care">Beauty & Personal Care</option>
                 <option value="Wellness & Supplements">Wellness & Supplements</option>
-                <option value="Apparel & Accessories">Apparel & Accessories</option>
-                <option value="Home & Lifestyle">Home & Lifestyle</option>
                 <option value="Other">Other</option>
               </select>
               {errors.category && <p className="text-red-500 text-xs mt-1">{errors.category}</p>}

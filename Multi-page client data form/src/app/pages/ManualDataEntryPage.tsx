@@ -104,10 +104,7 @@ export default function ManualDataEntryPage() {
                 >
                   <option value="">Select category</option>
                   <option value="Food & Beverage">Food & Beverage</option>
-                  <option value="Beauty & Personal Care">Beauty & Personal Care</option>
                   <option value="Wellness & Supplements">Wellness & Supplements</option>
-                  <option value="Apparel & Accessories">Apparel & Accessories</option>
-                  <option value="Home & Lifestyle">Home & Lifestyle</option>
                   <option value="Other">Other</option>
                 </select>
               </div>
