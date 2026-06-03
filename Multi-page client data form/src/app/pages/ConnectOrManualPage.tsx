@@ -30,13 +30,8 @@ export default function ConnectOrManualPage() {
           {/* Connect Shopify Option */}
           <div
             onClick={() => navigate("/shopify-connect")}
-            className="relative bg-white border-2 border-[#10b981] rounded-2xl p-8 cursor-pointer hover:shadow-lg transition-shadow"
+            className="relative bg-white border-2 border-[#d4d4d4] rounded-2xl p-8 cursor-pointer hover:shadow-lg transition-shadow hover:border-[#999]"
           >
-            {/* Recommended Badge */}
-            <div className="absolute -top-3 left-8 bg-[#10b981] text-white text-xs px-3 py-1 rounded-full">
-              RECOMMENDED
-            </div>
-
             {/* Icon */}
             <div className="w-14 h-14 bg-[#10b981] rounded-xl flex items-center justify-center mb-6">
               <ShoppingBag className="w-7 h-7 text-white" />
@@ -70,8 +65,13 @@ export default function ConnectOrManualPage() {
           {/* Enter Manually Option */}
           <div
             onClick={() => navigate("/manual-entry")}
-            className="bg-white border-2 border-[#d4d4d4] rounded-2xl p-8 cursor-pointer hover:shadow-lg transition-shadow hover:border-[#999]"
+            className="relative bg-white border-2 border-[#10b981] rounded-2xl p-8 cursor-pointer hover:shadow-lg transition-shadow"
           >
+            {/* Recommended Badge */}
+            <div className="absolute -top-3 left-8 bg-[#10b981] text-white text-xs px-3 py-1 rounded-full">
+              RECOMMENDED
+            </div>
+
             {/* Icon */}
             <div className="w-14 h-14 bg-[#1a1a1a] rounded-xl flex items-center justify-center mb-6">
               <FileText className="w-7 h-7 text-white" />
