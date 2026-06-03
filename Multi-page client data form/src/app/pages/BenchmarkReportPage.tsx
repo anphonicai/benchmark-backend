@@ -211,6 +211,11 @@ export default function BenchmarkReportPage() {
     if (saved) setData(saved);
   }, []);
 
+  useEffect(() => {
+    document.title = `Anphonic.ai Benchmark — ${data.brandName}`;
+    return () => { document.title = 'Anphonic.ai Benchmark'; };
+  }, [data.brandName]);
+
   const winningMetrics = data.metrics.filter((m) => m.status === 'up');
 
   return (
