@@ -1,6 +1,7 @@
-import { useNavigate } from "react-router";
+import { useNavigate, Link } from "react-router";
 import { ArrowRight } from "lucide-react";
 import Logo from "../components/Logo";
+import cohortConfig from "../utils/cohortConfig";
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -12,17 +13,22 @@ export default function HomePage() {
         <Logo />
         <div className="flex gap-8">
           <a href="#" className="text-[#666] hover:text-[#1a1a1a] transition-colors">BENCHMARKS</a>
-          <a href="#" className="text-[#666] hover:text-[#1a1a1a] transition-colors">EDITION 01</a>
+          <Link
+            to="/methodology"
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-[#F0FAFA] border border-[#CCE8E8] rounded-full text-xs font-semibold text-[#1C9393] tracking-wide hover:bg-[#CCE8E8] transition-colors"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-[#30B4B7]" />
+            HOW WE BENCHMARK
+          </Link>
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="px-12 py-24 max-w-7xl">
         {/* Badge */}
         <div className="inline-flex items-center gap-3 px-4 py-2 border border-[#d4d4d4] rounded-full mb-8">
           <span className="text-[#666] text-sm">THE SHELF INDEX</span>
           <span className="text-[#666]">·</span>
-          <span className="text-[#666] text-sm">INDIA D2C 2026</span>
+          <span className="text-[#666] text-sm">INDIA D2C {cohortConfig.data_window_year}</span>
         </div>
 
         {/* Hero Title */}
@@ -41,7 +47,7 @@ export default function HomePage() {
           Connect your Shopify store and get a verified diagnostic in 90 seconds.
         </p>
 
-        {/* CTA Button */}
+        {/* CTA */}
         <button
           onClick={() => navigate("/brand-info")}
           className="group bg-[#1a1a1a] text-white px-8 py-4 rounded-lg hover:bg-[#333] transition-colors flex items-center gap-2"
@@ -59,8 +65,46 @@ export default function HomePage() {
           <span>READ-ONLY SHOPIFY ACCESS</span>
         </div>
 
+        {/* Cohort Credential Strip */}
+        <div className="mt-16 max-w-2xl bg-white border border-[#E8EAED] rounded-2xl px-8 py-7">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex-1 text-center">
+              <div className="text-3xl font-semibold text-[#1C9393] tracking-tight leading-tight mb-1">
+                {cohortConfig.cohort_size}
+              </div>
+              <div className="text-xs text-[#6B7280] uppercase tracking-wider leading-snug">
+                Leading Indian<br />D2C brands
+              </div>
+            </div>
+            <div className="w-px h-10 bg-[#E8EAED] flex-shrink-0" />
+            <div className="flex-1 text-center">
+              <div className="text-3xl font-semibold text-[#1C9393] tracking-tight leading-tight mb-1">
+                {cohortConfig.tracked_value}
+              </div>
+              <div className="text-xs text-[#6B7280] uppercase tracking-wider leading-snug">
+                Tracked<br />transactions
+              </div>
+            </div>
+            <div className="w-px h-10 bg-[#E8EAED] flex-shrink-0" />
+            <div className="flex-1 text-center">
+              <div className="text-3xl font-semibold text-[#1C9393] tracking-tight leading-tight mb-1">
+                {cohortConfig.data_window}
+              </div>
+              <div className="text-xs text-[#6B7280] uppercase tracking-wider leading-snug">
+                {cohortConfig.data_window_year} data<br />window
+              </div>
+            </div>
+          </div>
+          <p className="mt-5 text-center text-sm text-[#6B7280]">
+            Your brand is benchmarked against this cohort.{" "}
+            <Link to="/methodology" className="text-[#1C9393] font-medium hover:underline">
+              How this works →
+            </Link>
+          </p>
+        </div>
+
         {/* Stats Section */}
-        <div className="grid grid-cols-3 gap-16 mt-32">
+        <div className="grid grid-cols-3 gap-16 mt-24">
           <div>
             <div className="text-sm text-[#999] mb-2">01 · REPEAT PURCHASE RATE</div>
             <div className="flex justify-between items-end">

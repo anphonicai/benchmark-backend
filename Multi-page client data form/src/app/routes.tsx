@@ -5,6 +5,7 @@ import ConnectOrManualPage from "./pages/ConnectOrManualPage";
 import ShopifyConnectionPage from "./pages/ShopifyConnectionPage";
 import ManualDataEntryPage from "./pages/ManualDataEntryPage";
 import BenchmarkReportPage from "./pages/BenchmarkReportPage";
+import MethodologyPage from "./pages/MethodologyPage";
 
 export const router = createBrowserRouter([
   {
@@ -30,5 +31,9 @@ export const router = createBrowserRouter([
   {
     path: "/benchmark-report",
     Component: BenchmarkReportPage,
+  },
+  {
+    path: "/methodology",
+    Component: MethodologyPage,
   },
 ]);

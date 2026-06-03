@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Logo from "../components/Logo";
 import { ArrowUpRight, Download, AlertTriangle, Zap } from "lucide-react";
+import cohortConfig from "../utils/cohortConfig";
 
 // ── Types ────────────────────────────────────────────────────────────────
 interface Gap {
@@ -292,9 +293,12 @@ export default function BenchmarkReportPage() {
             THE SHELF INDEX · EDITION 01 · ANPHONIC
           </p>
           <h1 className="text-5xl mb-3">{benchmarkData.brandName}</h1>
-          <p className="text-[#666] text-lg capitalize">
-            {benchmarkData.category} · Cohort Of {benchmarkData.cohortSize} D2C Brands · {benchmarkData.dataWindow} Window
-          </p>
+        </div>
+
+        {/* Cohort caption pill */}
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#F0FAFA] border border-[#CCE8E8] rounded-full text-xs font-medium text-[#1C9393] tracking-wide mb-6">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#30B4B7] flex-shrink-0" />
+          Benchmarked against {cohortConfig.cohort_size} Indian D2C brands · {cohortConfig.tracked_value} tracked · {cohortConfig.data_window_full}
         </div>
 
         {/* Score Card */}
@@ -507,15 +511,17 @@ export default function BenchmarkReportPage() {
         <div className="bg-[#1a1a1a] rounded-2xl p-10 mb-8 text-white flex justify-between items-center print:hidden">
           <div>
             <h3 className="text-2xl mb-2">Download the Shelf Index</h3>
-            <p className="text-sm text-[#999]">Save your full benchmark report as a PDF to share with your team.</p>
+            <p className="text-sm text-[#999]">Get the full Shelf Index report as a PDF to share with your team.</p>
           </div>
-          <button
-            onClick={() => window.print()}
+          <a
+            href="https://drive.google.com/uc?export=download&id=1I7geihmjOueHGG69zHNbki6u8JGydEDL"
+            target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center gap-2 bg-white text-[#1a1a1a] px-8 py-4 rounded-lg hover:bg-[#f0f0f0] transition-colors flex-shrink-0"
           >
             <Download className="w-5 h-5" />
             <span>Download Report</span>
-          </button>
+          </a>
         </div>
 
         {/* Talk to Anphonic */}
