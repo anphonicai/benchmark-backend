@@ -10,8 +10,6 @@ export default function ManualDataEntryPage() {
     repeatRate90d: "",
     repeatRevenueShare: "",
     timeTo2ndOrder: "",
-    rebuyRevenueShare: "",
-    personalisationAOVLift: "",
     averageOrderValue: "",
     estimatedOrdersPerMonth: "",
     loyalty: "",
@@ -44,8 +42,8 @@ export default function ManualDataEntryPage() {
       repeat_rate_90d_pct: Number(formData.repeatRate90d) || null,
       repeat_revenue_pct: Number(formData.repeatRevenueShare) || null,
       time_to_2nd_order_days_median: Number(formData.timeTo2ndOrder) || null,
-      rebuy_revenue_share_pct: Number(formData.rebuyRevenueShare) || null,
-      personalisation_aov_lift_pct: Number(formData.personalisationAOVLift) || null,
+      rebuy_revenue_share_pct: null,
+      personalisation_aov_lift_pct: null,
       average_order_value: Number(formData.averageOrderValue) || null,
       orders_per_month: Number(formData.estimatedOrdersPerMonth) || null,
       loyalty: formData.loyalty || null,
@@ -95,7 +93,7 @@ export default function ManualDataEntryPage() {
         {/* Title */}
         <h1 className="text-4xl mb-4">Manual Benchmark</h1>
         <p className="text-[#666] text-lg mb-12">
-          Six questions, three minutes.
+          Four questions, two minutes.
           <br />
           Use rough estimates if you don't have exact figures. We'll benchmark you directionally against the cohort.
         </p>
@@ -170,38 +168,6 @@ export default function ManualDataEntryPage() {
             </div>
 
             {/* Row 3 */}
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm text-[#666] mb-2">
-                  Rebuy revenue share (%) <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  placeholder="e.g., 8"
-                  value={formData.rebuyRevenueShare}
-                  onChange={(e) => setFormData({ ...formData, rebuyRevenueShare: e.target.value })}
-                  className="w-full px-4 py-3 bg-white border border-[#d4d4d4] rounded-lg focus:outline-none focus:border-[#1a1a1a]"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-[#666] mb-2">
-                  Personalisation AOV lift (%) <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  placeholder="e.g., 12"
-                  value={formData.personalisationAOVLift}
-                  onChange={(e) => setFormData({ ...formData, personalisationAOVLift: e.target.value })}
-                  className="w-full px-4 py-3 bg-white border border-[#d4d4d4] rounded-lg focus:outline-none focus:border-[#1a1a1a]"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Row 4 */}
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm text-[#666] mb-2">Average order value (INR)</label>

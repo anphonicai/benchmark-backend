@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import Logo from "../components/Logo";
-import { ArrowUpRight, CheckCircle2, ArrowDown } from "lucide-react";
+import { ArrowUpRight, CheckCircle2, ArrowDown, Download } from "lucide-react";
 import { BenchmarkData, loadBenchmarkData } from "../utils/benchmarkData";
 
 const defaultBenchmarkData: BenchmarkData = {
@@ -104,7 +104,14 @@ export default function BenchmarkReportPage() {
         {/* Title */}
         <div className="text-center mb-12">
           <h1 className="text-5xl mb-3">Benchmark Report</h1>
-          <p className="text-[#666]">Your benchmark report is below.</p>
+          <p className="text-[#666] mb-6">Your benchmark report is below.</p>
+          <button
+            onClick={() => window.print()}
+            className="inline-flex items-center gap-2 bg-[#1a1a1a] text-white px-6 py-3 rounded-lg hover:bg-[#333] transition-colors print:hidden"
+          >
+            <Download className="w-4 h-4" />
+            Download Report (PDF)
+          </button>
         </div>
 
         {/* Score Card */}
