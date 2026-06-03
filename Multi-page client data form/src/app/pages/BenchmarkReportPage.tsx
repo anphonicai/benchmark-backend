@@ -223,6 +223,20 @@ export default function BenchmarkReportPage() {
           </div>
         </div>
 
+        {/* Download Shelf Index */}
+        <div className="bg-[#1a1a1a] rounded-2xl p-10 mb-8 flex flex-col md:flex-row items-center justify-between gap-6 print:hidden">
+          <div>
+            <h3 className="text-white text-2xl mb-1">Download the Shelf Index</h3>
+            <p className="text-[#999] text-sm">Save your full benchmark report as a PDF to share with your team.</p>
+          </div>
+          <button
+            onClick={() => window.print()}
+            className="flex-shrink-0 inline-flex items-center gap-2 bg-white text-[#1a1a1a] px-8 py-4 rounded-lg hover:bg-[#f0f0f0] transition-colors font-medium text-lg"
+          >
+            ↓ Download Report
+          </button>
+        </div>
+
         {/* CTA Section */}
         <div className="bg-gradient-to-br from-[#0066ff] to-[#0052cc] rounded-2xl p-12 text-center text-white shadow-lg">
           <h2 className="text-4xl mb-4">Want to dive deeper?</h2>
