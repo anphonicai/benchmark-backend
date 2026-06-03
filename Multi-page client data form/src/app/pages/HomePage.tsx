@@ -22,7 +22,7 @@ export default function HomePage() {
         <div className="inline-flex items-center gap-3 px-4 py-2 border border-[#d4d4d4] rounded-full mb-8">
           <span className="text-[#666] text-sm">THE SHELF INDEX</span>
           <span className="text-[#666]">·</span>
-          <span className="text-[#666] text-sm">INDIA Q2C 2025</span>
+          <span className="text-[#666] text-sm">INDIA D2C 2026</span>
         </div>
 
         {/* Hero Title */}
