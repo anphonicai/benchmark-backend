@@ -381,14 +381,14 @@ router.post('/benchmark/manual', async (req, res) => {
        RETURNING id`,
       [
         companyId,
-        0, // total_revenue: default to 0
-        0, // total_orders: default to 0
-        0, // total_customers: default to 0
-        0, // repeat_customers: default to 0
-        0, // average_order_value: default to 0
-        0, // repeat_rate: default to 0
-        0, // add_to_cart_rate: default to 0
-        0, // revenue_from_repeat: default to 0
+        0,
+        0,
+        0,
+        0,
+        parseNumber(req.body.average_order_value),
+        0,
+        parseNumber(req.body.add_to_cart_rate),
+        0,
         scoreResult.shelf_score,
         scoreResult.percentile,
       ]

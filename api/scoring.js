@@ -73,13 +73,9 @@ const scoreMetric = (value, baseline, lowerIsBetter = false) => {
 
 const computeShelfScore = (metrics, categoryStr) => {
   const category = normalizeCategory(categoryStr);
-  const weights = baselines._scoring_weights || {};
 
+  // Scoring only uses manually entered metrics (rebuy/personalisation removed)
   const scores = {
-    repeat_rate_90d_pct: scoreMetric(
-      metrics.repeat_rate_90d_pct,
-      getBaseline(category, 'repeat_rate_90d_pct')
-    ),
     repeat_revenue_pct: scoreMetric(
       metrics.repeat_revenue_pct,
       getBaseline(category, 'repeat_revenue_pct')
@@ -89,20 +85,13 @@ const computeShelfScore = (metrics, categoryStr) => {
       getBaseline(category, 'time_to_2nd_order_days'),
       true
     ),
-    rebuy_revenue_share_pct: scoreMetric(
-      metrics.rebuy_revenue_share_pct,
-      getBaseline(category, 'rebuy_revenue_share_pct')
-    ),
-    personalisation_aov_lift_pct: scoreMetric(
-      metrics.personalisation_aov_lift_pct,
-      getBaseline(category, 'personalisation_aov_lift_pct')
-    ),
   };
+
+  const weights = { repeat_revenue_pct: 50, time_to_2nd_order_days: 50 };
 
   let composite = 0;
   let totalWeight = 0;
   for (const metric in weights) {
-    if (metric.startsWith('_')) continue;
     const weight = Number(weights[metric] || 0);
     if (scores[metric] !== undefined) {
       composite += scores[metric] * weight;
@@ -246,22 +235,6 @@ const identifyGaps = (metrics, manualInputs = {}, scoreResult, brandContext = {}
     });
   }
 
-  // ── GAP 5: Underutilised Rebuy ──
-  if (metrics.rebuy_revenue_share_pct !== undefined && metrics.rebuy_revenue_share_pct !== null && metrics.rebuy_revenue_share_pct < 12) {
-    const gapData = baselines._gap_revenue_estimates?.underutilised_rebuy || {};
-    const upliftPoints = gapData.estimated_uplift_points || 6;
-    const revenueAtStake = Math.round(annualRevenue * (upliftPoints / 100));
-    gaps.push({
-      id: 'underutilised_rebuy',
-      rank_score: 95,
-      title: 'Rebuy Engine running well below configuration target.',
-      comparison: `Target range for a well-configured Rebuy account is 12-18% of store revenue. Portfolio average is 15.8%. You are at ${metrics.rebuy_revenue_share_pct}%.`,
-      cohort_data: 'The range across the cohort is 2.8% to 28.5%. Configuration quality matters more than the tool itself.',
-      revenue_at_stake_inr: revenueAtStake,
-      revenue_period: 'annual',
-    });
-  }
-
   // Sort by rank_score descending, take top 3
   gaps.sort((a, b) => b.rank_score - a.rank_score);
   return gaps.slice(0, 3);
@@ -275,11 +248,8 @@ const buildComparisonTable = (metrics, categoryKey) => {
   const comparisons = [];
 
   const metricMap = [
-    { key: 'repeat_rate_90d_pct', label: 'Repeat purchase rate', unit: '%', sublabel: '90 day window' },
     { key: 'repeat_revenue_pct', label: 'Revenue from repeat customers', unit: '%', sublabel: 'trailing 90 days' },
     { key: 'time_to_2nd_order_days', label: 'Time to second order', unit: ' days', sublabel: 'median', lowerIsBetter: true, metricsKey: 'time_to_2nd_order_days_median' },
-    { key: 'rebuy_revenue_share_pct', label: 'Rebuy revenue share', unit: '%', sublabel: 'personalisation revenue' },
-    { key: 'personalisation_aov_lift_pct', label: 'Personalisation AOV lift', unit: '%', sublabel: 'on Rebuy orders' },
   ];
 
   for (const m of metricMap) {
