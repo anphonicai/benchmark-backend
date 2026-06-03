@@ -3,6 +3,11 @@ import { useNavigate } from "react-router";
 import { AlertCircle } from "lucide-react";
 import Logo from "../components/Logo";
 
+const inputClass = (error: string) =>
+  `w-full px-4 py-3 bg-white border rounded-lg focus:outline-none transition-colors ${
+    error ? "border-red-400 focus:border-red-500" : "border-[#d4d4d4] focus:border-[#1a1a1a]"
+  }`;
+
 export default function BrandInfoPage() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -16,58 +21,93 @@ export default function BrandInfoPage() {
     ordersPerMonth: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // persist brand info to localStorage
-    try {
-      localStorage.setItem('brandInfo', JSON.stringify(formData));
-    } catch (e) {
-      console.warn('Failed to save brand info to localStorage', e);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validate = () => {
+    const e: Record<string, string> = {};
+
+    // Full name: letters, spaces, dots, hyphens only — no numbers
+    if (!formData.fullName.trim()) {
+      e.fullName = "Full name is required.";
+    } else if (!/^[a-zA-Z\s.\-']+$/.test(formData.fullName.trim())) {
+      e.fullName = "Name should contain only letters, spaces, or hyphens.";
     }
 
-    // Send brand info to backend to store in database
+    if (!formData.role) e.role = "Please select your role.";
+
+    if (!formData.email.trim()) e.email = "Work email is required.";
+
+    // Phone: exactly 10 digits (strip spaces/dashes first)
+    const digits = formData.phone.replace(/\D/g, "");
+    if (!formData.phone.trim()) {
+      e.phone = "Phone number is required.";
+    } else if (digits.length !== 10) {
+      e.phone = "Phone number must be exactly 10 digits.";
+    }
+
+    if (!formData.brandName.trim()) e.brandName = "Brand name is required.";
+
+    // Shopify URL: must end with .myshopify.com
+    const shopify = formData.shopifyUrl.trim().toLowerCase().replace(/^https?:\/\//, "");
+    if (!formData.shopifyUrl.trim()) {
+      e.shopifyUrl = "Shopify store URL is required.";
+    } else if (!shopify.endsWith(".myshopify.com")) {
+      e.shopifyUrl = "Please enter a valid Shopify URL ending in .myshopify.com (e.g. yourbrand.myshopify.com)";
+    }
+
+    if (!formData.category) e.category = "Please select a category.";
+    if (!formData.ordersPerMonth) e.ordersPerMonth = "Please select orders per month.";
+
+    return e;
+  };
+
+  const handleBlur = (field: string) => {
+    const result = validate();
+    setErrors((prev) => ({ ...prev, [field]: result[field] || "" }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const result = validate();
+    if (Object.keys(result).length > 0) {
+      setErrors(result);
+      return;
+    }
+
+    // Normalise phone to digits only before saving
+    const cleanedPhone = formData.phone.replace(/\D/g, "");
+    const cleanedData = { ...formData, phone: cleanedPhone };
+
+    try {
+      localStorage.setItem('brandInfo', JSON.stringify(cleanedData));
+    } catch {
+      console.warn('Failed to save brand info to localStorage');
+    }
+
     fetch('/api/companies/brand-info', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData),
+      body: JSON.stringify(cleanedData),
     })
       .then((res) => res.json())
       .then((data) => {
         if (data && data.success) {
-          console.log('Brand info saved to database:', data.companyId);
-          // Store companyId in localStorage for later use
-          try {
-            localStorage.setItem('companyId', String(data.companyId));
-          } catch (e) {
-            console.warn('Failed to save companyId to localStorage', e);
-          }
-        } else {
-          console.warn('Failed to save brand info to database:', data?.message);
+          try { localStorage.setItem('companyId', String(data.companyId)); } catch {}
         }
-        // Navigate regardless of DB save success (localStorage was successful)
         navigate("/connect-or-manual");
       })
-      .catch((err) => {
-        console.error('Error posting brand info:', err);
-        // Still navigate if localStorage was successful
-        navigate("/connect-or-manual");
-      });
+      .catch(() => navigate("/connect-or-manual"));
   };
 
   return (
     <div className="min-h-screen bg-[#f8f6f3]">
-      {/* Header */}
       <header className="px-12 py-6">
         <Logo />
       </header>
 
-      {/* Main Content */}
       <main className="px-12 py-16 max-w-3xl mx-auto">
-        {/* Step Indicator */}
         <div className="text-sm text-[#999] mb-6">01 · WHO ARE WE BENCHMARKING?</div>
 
-        {/* Title */}
         <h1 className="text-5xl mb-4">Tell us about your brand.</h1>
         <p className="text-[#666] text-lg mb-12">
           We use this to send your benchmark report and connect you with the right
@@ -75,8 +115,8 @@ export default function BrandInfoPage() {
           person on our team if you want a deeper diagnostic.
         </p>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+          {/* Row 1 — Name + Role */}
           <div className="grid grid-cols-2 gap-6">
             <div>
               <label className="block text-sm text-[#666] mb-2">
@@ -87,9 +127,10 @@ export default function BrandInfoPage() {
                 placeholder="Rohan Kapoor"
                 value={formData.fullName}
                 onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                className="w-full px-4 py-3 bg-white border border-[#d4d4d4] rounded-lg focus:outline-none focus:border-[#1a1a1a]"
-                required
+                onBlur={() => handleBlur("fullName")}
+                className={inputClass(errors.fullName)}
               />
+              {errors.fullName && <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>}
             </div>
             <div>
               <label className="block text-sm text-[#666] mb-2">
@@ -98,8 +139,8 @@ export default function BrandInfoPage() {
               <select
                 value={formData.role}
                 onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                className="w-full px-4 py-3 bg-white border border-[#d4d4d4] rounded-lg focus:outline-none focus:border-[#1a1a1a] appearance-none"
-                required
+                onBlur={() => handleBlur("role")}
+                className={inputClass(errors.role) + " appearance-none"}
               >
                 <option value="">Select your role</option>
                 <option value="Founder/CEO">Founder/CEO</option>
@@ -110,9 +151,11 @@ export default function BrandInfoPage() {
                 <option value="Operational Lead">Operational Lead</option>
                 <option value="Other">Other</option>
               </select>
+              {errors.role && <p className="text-red-500 text-xs mt-1">{errors.role}</p>}
             </div>
           </div>
 
+          {/* Row 2 — Email + Phone */}
           <div className="grid grid-cols-2 gap-6">
             <div>
               <label className="block text-sm text-[#666] mb-2">
@@ -123,9 +166,10 @@ export default function BrandInfoPage() {
                 placeholder="rohan@yourbrand.com"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-3 bg-white border border-[#d4d4d4] rounded-lg focus:outline-none focus:border-[#1a1a1a]"
-                required
+                onBlur={() => handleBlur("email")}
+                className={inputClass(errors.email)}
               />
+              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
             </div>
             <div>
               <label className="block text-sm text-[#666] mb-2">
@@ -133,15 +177,22 @@ export default function BrandInfoPage() {
               </label>
               <input
                 type="tel"
-                placeholder="+91 98765 43210"
+                placeholder="9876543210"
+                maxLength={10}
                 value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="w-full px-4 py-3 bg-white border border-[#d4d4d4] rounded-lg focus:outline-none focus:border-[#1a1a1a]"
-                required
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, "").slice(0, 10);
+                  setFormData({ ...formData, phone: val });
+                }}
+                onBlur={() => handleBlur("phone")}
+                className={inputClass(errors.phone)}
               />
+              <p className="text-xs text-[#999] mt-1">10-digit mobile number</p>
+              {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
             </div>
           </div>
 
+          {/* Brand Name */}
           <div>
             <label className="block text-sm text-[#666] mb-2">
               BRAND NAME <span className="text-red-500">*</span>
@@ -151,28 +202,32 @@ export default function BrandInfoPage() {
               placeholder="Your D2C brand"
               value={formData.brandName}
               onChange={(e) => setFormData({ ...formData, brandName: e.target.value })}
-              className="w-full px-4 py-3 bg-white border border-[#d4d4d4] rounded-lg focus:outline-none focus:border-[#1a1a1a]"
-              required
+              onBlur={() => handleBlur("brandName")}
+              className={inputClass(errors.brandName)}
             />
+            {errors.brandName && <p className="text-red-500 text-xs mt-1">{errors.brandName}</p>}
           </div>
 
+          {/* Shopify URL */}
           <div>
             <label className="block text-sm text-[#666] mb-2">
               SHOPIFY STORE URL <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
-              placeholder="yourbrand.myshopify.com or yourbrand.com"
+              placeholder="yourbrand.myshopify.com"
               value={formData.shopifyUrl}
               onChange={(e) => setFormData({ ...formData, shopifyUrl: e.target.value })}
-              className="w-full px-4 py-3 bg-white border border-[#d4d4d4] rounded-lg focus:outline-none focus:border-[#1a1a1a]"
-              required
+              onBlur={() => handleBlur("shopifyUrl")}
+              className={inputClass(errors.shopifyUrl)}
             />
             <p className="text-sm text-[#999] mt-2">
-              We'll use this to fetch your real-only Shopify data in the next step.
+              Must end in .myshopify.com — e.g. yourbrand.myshopify.com
             </p>
+            {errors.shopifyUrl && <p className="text-red-500 text-xs mt-1">{errors.shopifyUrl}</p>}
           </div>
 
+          {/* Category + Orders per month */}
           <div className="grid grid-cols-2 gap-6">
             <div>
               <label className="block text-sm text-[#666] mb-2">
@@ -181,8 +236,8 @@ export default function BrandInfoPage() {
               <select
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className="w-full px-4 py-3 bg-white border border-[#d4d4d4] rounded-lg focus:outline-none focus:border-[#1a1a1a] appearance-none"
-                required
+                onBlur={() => handleBlur("category")}
+                className={inputClass(errors.category) + " appearance-none"}
               >
                 <option value="">Select category</option>
                 <option value="Food & Beverage">Food & Beverage</option>
@@ -192,6 +247,7 @@ export default function BrandInfoPage() {
                 <option value="Home & Lifestyle">Home & Lifestyle</option>
                 <option value="Other">Other</option>
               </select>
+              {errors.category && <p className="text-red-500 text-xs mt-1">{errors.category}</p>}
             </div>
             <div>
               <label className="block text-sm text-[#666] mb-2">
@@ -200,8 +256,8 @@ export default function BrandInfoPage() {
               <select
                 value={formData.ordersPerMonth}
                 onChange={(e) => setFormData({ ...formData, ordersPerMonth: e.target.value })}
-                className="w-full px-4 py-3 bg-white border border-[#d4d4d4] rounded-lg focus:outline-none focus:border-[#1a1a1a] appearance-none"
-                required
+                onBlur={() => handleBlur("ordersPerMonth")}
+                className={inputClass(errors.ordersPerMonth) + " appearance-none"}
               >
                 <option value="">Select range</option>
                 <option value="Under 500">Under 500</option>
@@ -211,10 +267,11 @@ export default function BrandInfoPage() {
                 <option value="15000 to 50000">15,000 to 50,000</option>
                 <option value="Over 50000">Over 50,000</option>
               </select>
+              {errors.ordersPerMonth && <p className="text-red-500 text-xs mt-1">{errors.ordersPerMonth}</p>}
             </div>
           </div>
 
-          {/* Warning Message */}
+          {/* Warning */}
           <div className="flex gap-3 p-4 bg-[#fff4e6] border border-[#ffd699] rounded-lg">
             <AlertCircle className="w-5 h-5 text-[#ff9800] flex-shrink-0 mt-0.5" />
             <p className="text-sm text-[#666]">
@@ -222,7 +279,6 @@ export default function BrandInfoPage() {
             </p>
           </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
             className="w-full bg-[#1a1a1a] text-white px-8 py-4 rounded-lg hover:bg-[#333] transition-colors"
