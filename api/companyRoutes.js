@@ -517,10 +517,10 @@ router.post('/brand-info', async (req, res) => {
     if (digits.length === 11 && digits.startsWith('0')) core = digits.slice(1);
 
     const validFormat = core.length === 10 && /^[6-9]\d{9}$/.test(core);
-    const allSameDigit = /^(\d)\1{9}$/.test(core);
-    const tooManyRepeating = /(\d)\1{5}/.test(core);
+    const tooManyRepeating = /(\d)\1{3}/.test(core);
+    const notEnoughVariety = new Set(core.split('')).size < 4;
 
-    if (!validFormat || allSameDigit || tooManyRepeating) {
+    if (!validFormat || tooManyRepeating || notEnoughVariety) {
       return res.status(400).json({
         success: false,
         field: 'phone',

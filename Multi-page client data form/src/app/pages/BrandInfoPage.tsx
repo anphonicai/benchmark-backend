@@ -47,9 +47,9 @@ export default function BrandInfoPage() {
       e.phone = "Phone number is required.";
     } else if (!/^[6-9]\d{9}$/.test(phoneDigits)) {
       e.phone = "Enter a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9.";
-    } else if (/^(\d)\1{9}$/.test(phoneDigits)) {
+    } else if (/(\d)\1{3}/.test(phoneDigits)) {
       e.phone = "Please enter a real mobile number.";
-    } else if (/(\d)\1{5}/.test(phoneDigits)) {
+    } else if (new Set(phoneDigits.split('')).size < 4) {
       e.phone = "Please enter a real mobile number.";
     }
 
