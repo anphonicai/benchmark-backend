@@ -509,22 +509,37 @@ router.post('/brand-info', async (req, res) => {
     });
   }
 
-  // Phone validation: Indian mobile numbers only
+  // Phone validation: India or UAE mobile numbers
   if (phone) {
     const digits = String(phone).replace(/\D/g, '');
-    let core = digits;
-    if (digits.length === 12 && digits.startsWith('91')) core = digits.slice(2);
-    if (digits.length === 11 && digits.startsWith('0')) core = digits.slice(1);
+    let core = '';
+    let country = '';
 
-    const validFormat = core.length === 10 && /^[6-9]\d{9}$/.test(core);
-    const tooManyRepeating = /(\d)\1{3}/.test(core);
-    const notEnoughVariety = new Set(core.split('')).size < 4;
+    // India: +91XXXXXXXXXX (12), 0XXXXXXXXXX (11), XXXXXXXXXX (10)
+    if (digits.length === 12 && digits.startsWith('91') && /^[6-9]/.test(digits[2])) {
+      core = digits.slice(2); country = 'IN';
+    } else if (digits.length === 11 && digits.startsWith('0') && /^[6-9]/.test(digits[1])) {
+      core = digits.slice(1); country = 'IN';
+    } else if (digits.length === 10 && /^[6-9]/.test(digits[0])) {
+      core = digits; country = 'IN';
+    // UAE: +971XXXXXXXXX (12), 05XXXXXXXXX (10 with 0), 5XXXXXXXXX (9)
+    } else if (digits.length === 12 && digits.startsWith('971') && digits[3] === '5') {
+      core = digits.slice(3); country = 'AE';
+    } else if (digits.length === 10 && digits.startsWith('05')) {
+      core = digits.slice(1); country = 'AE';
+    } else if (digits.length === 9 && digits.startsWith('5')) {
+      core = digits; country = 'AE';
+    }
 
-    if (!validFormat || tooManyRepeating || notEnoughVariety) {
+    const indiaValid = country === 'IN' && /^[6-9]\d{9}$/.test(core);
+    const uaeValid   = country === 'AE' && /^5\d{8}$/.test(core);
+    const notFake    = !/(\d)\1{3}/.test(core) && new Set(core.split('')).size >= 4;
+
+    if ((!indiaValid && !uaeValid) || !notFake) {
       return res.status(400).json({
         success: false,
         field: 'phone',
-        message: 'Please enter a valid Indian mobile number.',
+        message: 'Enter a valid Indian (10-digit) or UAE (+971 / 05X) mobile number.',
       });
     }
   }

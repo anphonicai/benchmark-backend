@@ -41,15 +41,36 @@ export default function BrandInfoPage() {
       e.email = "Please enter a valid email address (e.g. rohan@yourbrand.com).";
     }
 
-    // Phone: 10 digits starting with 6-9, no repeating patterns
+    // Phone: India or UAE, strip country code then validate core
     const phoneDigits = formData.phone.replace(/\D/g, "");
+    let phoneCore = phoneDigits;
+    let phoneCountry = "";
+
+    // India: +91XXXXXXXXXX (12), 0XXXXXXXXXX (11), XXXXXXXXXX (10)
+    if (phoneDigits.length === 12 && phoneDigits.startsWith("91") && /^[6-9]/.test(phoneDigits.slice(2))) {
+      phoneCore = phoneDigits.slice(2); phoneCountry = "IN";
+    } else if (phoneDigits.length === 11 && phoneDigits.startsWith("0") && /^[6-9]/.test(phoneDigits.slice(1))) {
+      phoneCore = phoneDigits.slice(1); phoneCountry = "IN";
+    } else if (phoneDigits.length === 10 && /^[6-9]/.test(phoneDigits)) {
+      phoneCore = phoneDigits; phoneCountry = "IN";
+    // UAE: +971XXXXXXXXX (12), 0XXXXXXXXX (10 with leading 0), XXXXXXXXX (9)
+    } else if (phoneDigits.length === 12 && phoneDigits.startsWith("971") && phoneDigits[3] === "5") {
+      phoneCore = phoneDigits.slice(3); phoneCountry = "AE";
+    } else if (phoneDigits.length === 10 && phoneDigits.startsWith("05")) {
+      phoneCore = phoneDigits.slice(1); phoneCountry = "AE";
+    } else if (phoneDigits.length === 9 && phoneDigits.startsWith("5")) {
+      phoneCore = phoneDigits; phoneCountry = "AE";
+    }
+
+    const indiaValid = phoneCountry === "IN" && /^[6-9]\d{9}$/.test(phoneCore);
+    const uaeValid   = phoneCountry === "AE" && /^5\d{8}$/.test(phoneCore);
+    const notFake    = !/(\d)\1{3}/.test(phoneCore) && new Set(phoneCore.split("")).size >= 4;
+
     if (!phoneDigits) {
       e.phone = "Phone number is required.";
-    } else if (!/^[6-9]\d{9}$/.test(phoneDigits)) {
-      e.phone = "Enter a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9.";
-    } else if (/(\d)\1{3}/.test(phoneDigits)) {
-      e.phone = "Please enter a real mobile number.";
-    } else if (new Set(phoneDigits.split('')).size < 4) {
+    } else if (!indiaValid && !uaeValid) {
+      e.phone = "Enter a valid Indian (10-digit) or UAE (+971 / 05X) mobile number.";
+    } else if (!notFake) {
       e.phone = "Please enter a real mobile number.";
     }
 
@@ -202,16 +223,16 @@ export default function BrandInfoPage() {
               </label>
               <input
                 type="tel"
-                placeholder="9876543210"
-                maxLength={10}
+                placeholder="9876543210 or +971 501234567"
                 value={formData.phone}
                 onChange={(e) => {
-                  const val = e.target.value.replace(/[^\d+\s\-]/g, "").slice(0, 15);
+                  const val = e.target.value.replace(/[^\d+\s\-]/g, "").slice(0, 16);
                   setFormData({ ...formData, phone: val });
                 }}
                 onBlur={() => handleBlur("phone")}
                 className={inputClass(errors.phone)}
               />
+              <p className="text-xs text-[#999] mt-1">India or UAE numbers accepted</p>
               {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
             </div>
           </div>
