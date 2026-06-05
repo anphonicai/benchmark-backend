@@ -66,7 +66,7 @@ export default function HomePage() {
         </div>
 
         {/* Cohort Credential Strip */}
-        <div className="mt-10 md:mt-16 max-w-2xl bg-white border border-[#E8EAED] rounded-2xl px-4 py-6 md:px-8 md:py-7">
+        <div className="mt-10 md:mt-16 max-w-2xl mx-auto bg-white border border-[#E8EAED] rounded-2xl px-4 py-6 md:px-8 md:py-7">
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1 text-center">
               <div className="text-3xl font-semibold text-[#1C9393] tracking-tight leading-tight mb-1">
