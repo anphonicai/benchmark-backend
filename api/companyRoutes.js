@@ -648,12 +648,12 @@ router.get('/validate-shopify-url', async (req, res) => {
 
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
+    const timeout = setTimeout(() => controller.abort(), 10000);
 
     let response;
     try {
       response = await fetch(trimmed, {
-        method: 'HEAD',
+        method: 'GET',
         redirect: 'follow',
         signal: controller.signal,
         headers: { 'User-Agent': 'Mozilla/5.0 (compatible; BenchmarkChecker/1.0)' },
@@ -662,7 +662,17 @@ router.get('/validate-shopify-url', async (req, res) => {
       clearTimeout(timeout);
     }
 
-    const isShopify = SHOPIFY_HEADERS.some((h) => response.headers.has(h));
+    // Check Shopify-specific response headers (works for stores not behind a CDN)
+    if (SHOPIFY_HEADERS.some((h) => response.headers.has(h))) {
+      return res.status(200).json({ success: true, isShopify: true });
+    }
+
+    // Fallback: check HTML body for Shopify CDN references (works even when a CDN strips headers)
+    const html = await response.text();
+    const isShopify = html.includes('cdn.shopify.com') ||
+                      html.includes('Shopify.shop') ||
+                      html.includes('shopify_pay') ||
+                      html.includes('myshopify.com');
 
     if (!isShopify) {
       return res.status(200).json({ success: true, isShopify: false, message: 'This does not appear to be a Shopify store.' });
