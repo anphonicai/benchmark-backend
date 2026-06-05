@@ -562,7 +562,7 @@ router.post('/brand-info', async (req, res) => {
 
   // Shopify URL: valid domain, max 200 chars
   if (shopifyUrl) {
-    const domainRegex = /^(https?:\/\/)(www\.)?[a-zA-Z][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]?\.[a-zA-Z]{2,}(\/[^\s]{0,100})?$/;
+    const domainRegex = /^https:\/\/(([a-zA-Z0-9][a-zA-Z0-9\-]*\.)+[a-zA-Z]{2,})(\/[^\s]{0,200})?$/;
     if (shopifyUrl.length > 200 || !domainRegex.test(shopifyUrl.trim())) {
       return res.status(400).json({
         success: false,

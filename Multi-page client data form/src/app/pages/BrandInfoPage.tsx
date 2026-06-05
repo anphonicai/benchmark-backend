@@ -109,7 +109,7 @@ export default function BrandInfoPage() {
 
     // Shopify URL: must start with https://, valid domain, max 200 chars
     const shopifyTrimmed = formData.shopifyUrl.trim();
-    const domainRegex = /^https:\/\/(www\.)?[a-zA-Z][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]?\.[a-zA-Z]{2,}(\/[^\s]{0,100})?$/;
+    const domainRegex = /^https:\/\/(([a-zA-Z0-9][a-zA-Z0-9\-]*\.)+[a-zA-Z]{2,})(\/[^\s]{0,200})?$/;
     if (!shopifyTrimmed) {
       e.shopifyUrl = "Shopify store URL is required.";
     } else if (shopifyTrimmed.length > 200) {
@@ -131,7 +131,7 @@ export default function BrandInfoPage() {
   const handleBlur = (field: string) => {
     if (field === 'shopifyUrl') {
       const trimmed = formData.shopifyUrl.trim();
-      const domainRegex = /^https:\/\/(www\.)?[a-zA-Z][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]?\.[a-zA-Z]{2,}(\/[^\s]{0,100})?$/;
+      const domainRegex = /^https:\/\/(([a-zA-Z0-9][a-zA-Z0-9\-]*\.)+[a-zA-Z]{2,})(\/[^\s]{0,200})?$/;
       if (trimmed && domainRegex.test(trimmed) && shopifyVerify === 'idle') {
         verifyShopifyUrl(trimmed);
         return;
