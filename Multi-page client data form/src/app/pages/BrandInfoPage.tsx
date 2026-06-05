@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader2, XCircle } from "lucide-react";
 import Logo from "../components/Logo";
 
 const inputClass = (error: string) =>
@@ -22,6 +22,28 @@ export default function BrandInfoPage() {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [shopifyVerify, setShopifyVerify] = useState('idle' as 'idle' | 'checking' | 'valid' | 'invalid');
+  const [shopifyVerifyMsg, setShopifyVerifyMsg] = useState('');
+
+  const verifyShopifyUrl = async (url: string) => {
+    setShopifyVerify('checking');
+    setShopifyVerifyMsg('');
+    try {
+      const res = await fetch(`/api/companies/validate-shopify-url?url=${encodeURIComponent(url)}`);
+      const data = await res.json();
+      if (data.isShopify) {
+        setShopifyVerify('valid');
+        setShopifyVerifyMsg('');
+        setErrors((prev: Record<string, string>) => ({ ...prev, shopifyUrl: '' }));
+      } else {
+        setShopifyVerify('invalid');
+        setShopifyVerifyMsg(data.message || 'This does not appear to be a Shopify store.');
+      }
+    } catch {
+      setShopifyVerify('invalid');
+      setShopifyVerifyMsg('Could not verify the URL. Please check your connection.');
+    }
+  };
 
   const validate = () => {
     const e: Record<string, string> = {};
@@ -85,15 +107,19 @@ export default function BrandInfoPage() {
       e.brandName = "Brand name must contain at least some letters.";
     }
 
-    // Shopify URL: valid domain format, letters in domain, max 200 chars
+    // Shopify URL: must start with https://, valid domain, max 200 chars
     const shopifyTrimmed = formData.shopifyUrl.trim();
-    const domainRegex = /^(https?:\/\/)(www\.)?[a-zA-Z][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]?\.[a-zA-Z]{2,}(\/[^\s]{0,100})?$/;
+    const domainRegex = /^https:\/\/(www\.)?[a-zA-Z][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]?\.[a-zA-Z]{2,}(\/[^\s]{0,100})?$/;
     if (!shopifyTrimmed) {
       e.shopifyUrl = "Shopify store URL is required.";
     } else if (shopifyTrimmed.length > 200) {
       e.shopifyUrl = "URL is too long. Please enter your store's main domain (e.g. https://yourbrand.com).";
     } else if (!domainRegex.test(shopifyTrimmed)) {
-      e.shopifyUrl = "Please enter a valid store URL (e.g. https://yourbrand.com).";
+      e.shopifyUrl = "Please enter a valid URL starting with https:// (e.g. https://yourbrand.com).";
+    } else if (shopifyVerify === 'invalid') {
+      e.shopifyUrl = shopifyVerifyMsg || "This does not appear to be a Shopify store.";
+    } else if (shopifyVerify === 'idle' || shopifyVerify === 'checking') {
+      e.shopifyUrl = "Please wait — verifying your Shopify store URL.";
     }
 
     if (!formData.category) e.category = "Please select a category.";
@@ -103,12 +129,24 @@ export default function BrandInfoPage() {
   };
 
   const handleBlur = (field: string) => {
+    if (field === 'shopifyUrl') {
+      const trimmed = formData.shopifyUrl.trim();
+      const domainRegex = /^https:\/\/(www\.)?[a-zA-Z][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]?\.[a-zA-Z]{2,}(\/[^\s]{0,100})?$/;
+      if (trimmed && domainRegex.test(trimmed) && shopifyVerify === 'idle') {
+        verifyShopifyUrl(trimmed);
+        return;
+      }
+    }
     const result = validate();
     setErrors((prev) => ({ ...prev, [field]: result[field] || "" }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (shopifyVerify === 'checking') {
+      setErrors((prev: Record<string, string>) => ({ ...prev, shopifyUrl: "Please wait — verifying your Shopify store URL." }));
+      return;
+    }
     const result = validate();
     if (Object.keys(result).length > 0) {
       setErrors(result);
@@ -258,17 +296,38 @@ export default function BrandInfoPage() {
             <label className="block text-sm text-[#666] mb-2">
               SHOPIFY STORE URL <span className="text-red-500">*</span>
             </label>
-            <input
-              type="text"
-              placeholder="https://yourbrand.com or www.yourbrand.com"
-              value={formData.shopifyUrl}
-              onChange={(e) => setFormData({ ...formData, shopifyUrl: e.target.value })}
-              onBlur={() => handleBlur("shopifyUrl")}
-              className={inputClass(errors.shopifyUrl)}
-            />
-            <p className="text-sm text-[#999] mt-2">
-              Must start with https:// or www. — e.g. https://yourbrand.com
-            </p>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="https://yourbrand.com"
+                value={formData.shopifyUrl}
+                onChange={(e) => {
+                  setFormData({ ...formData, shopifyUrl: e.target.value });
+                  setShopifyVerify('idle');
+                  setShopifyVerifyMsg('');
+                }}
+                onBlur={() => handleBlur("shopifyUrl")}
+                className={inputClass(errors.shopifyUrl) + " pr-10"}
+              />
+              {shopifyVerify === 'checking' && (
+                <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#999] animate-spin" />
+              )}
+              {shopifyVerify === 'valid' && (
+                <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-500" />
+              )}
+              {shopifyVerify === 'invalid' && (
+                <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-red-500" />
+              )}
+            </div>
+            {shopifyVerify === 'checking' && (
+              <p className="text-xs text-[#999] mt-1">Verifying Shopify store...</p>
+            )}
+            {shopifyVerify === 'valid' && (
+              <p className="text-xs text-green-600 mt-1">Shopify store verified.</p>
+            )}
+            {shopifyVerify !== 'checking' && shopifyVerify !== 'valid' && (
+              <p className="text-sm text-[#999] mt-2">Must start with https:// — e.g. https://yourbrand.com</p>
+            )}
             {errors.shopifyUrl && <p className="text-red-500 text-xs mt-1">{errors.shopifyUrl}</p>}
           </div>
 

@@ -5,6 +5,11 @@ const { fetchShopifyMetrics, fetchShopifyQL } = require('./shopify');
 
 const router = express.Router();
 
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+
+const SHOPIFY_HEADERS = ['x-shopid', 'x-shopify-stage', 'x-shardid', 'x-sorting-hat-podid'];
+const BLOCKLISTED_HOSTS = /localhost|127\.0\.0\.1|0\.0\.0\.0|192\.168\.|^10\.|example\.com|test\.com/i;
+
 const isEmptyValue = (value) => value === undefined || value === null || value === '';
 const parseNumber = (value, fallback = null) => {
   const number = Number(value);
@@ -615,6 +620,60 @@ router.post('/brand-info', async (req, res) => {
       success: false,
       message: error.message,
     });
+  }
+});
+
+// GET /api/companies/validate-shopify-url?url=https://yourbrand.com
+router.get('/validate-shopify-url', async (req, res) => {
+  const { url } = req.query;
+
+  if (!url) {
+    return res.status(400).json({ success: false, message: 'url query param is required' });
+  }
+
+  const trimmed = String(url).trim();
+
+  if (!trimmed.startsWith('https://')) {
+    return res.status(200).json({ success: false, isShopify: false, message: 'URL must start with https://' });
+  }
+
+  if (BLOCKLISTED_HOSTS.test(trimmed)) {
+    return res.status(200).json({ success: false, isShopify: false, message: 'Please enter a real Shopify store URL.' });
+  }
+
+  // .myshopify.com domains are always Shopify — no HTTP check needed
+  if (/\.myshopify\.com(\/.*)?$/i.test(trimmed)) {
+    return res.status(200).json({ success: true, isShopify: true });
+  }
+
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+
+    let response;
+    try {
+      response = await fetch(trimmed, {
+        method: 'HEAD',
+        redirect: 'follow',
+        signal: controller.signal,
+        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; BenchmarkChecker/1.0)' },
+      });
+    } finally {
+      clearTimeout(timeout);
+    }
+
+    const isShopify = SHOPIFY_HEADERS.some((h) => response.headers.has(h));
+
+    if (!isShopify) {
+      return res.status(200).json({ success: true, isShopify: false, message: 'This does not appear to be a Shopify store.' });
+    }
+
+    return res.status(200).json({ success: true, isShopify: true });
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      return res.status(200).json({ success: false, isShopify: false, message: 'Store URL timed out. Please check it is live.' });
+    }
+    return res.status(200).json({ success: false, isShopify: false, message: 'Could not reach this URL. Please verify it is correct and live.' });
   }
 });
 
