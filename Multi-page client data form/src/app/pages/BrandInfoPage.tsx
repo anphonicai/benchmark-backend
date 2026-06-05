@@ -104,15 +104,15 @@ export default function BrandInfoPage() {
 
   return (
     <div className="min-h-screen bg-[#f8f6f3]">
-      <header className="px-12 py-6">
+      <header className="px-4 py-4 md:px-12 md:py-6">
         <Logo />
       </header>
 
-      <main className="px-12 py-16 max-w-3xl mx-auto">
+      <main className="px-4 py-8 md:px-12 md:py-16 max-w-3xl mx-auto">
         <div className="text-sm text-[#999] mb-6">01 · WHO ARE WE BENCHMARKING?</div>
 
-        <h1 className="text-5xl mb-4">Tell us about your brand.</h1>
-        <p className="text-[#666] text-lg mb-12">
+        <h1 className="text-3xl md:text-5xl mb-4">Tell us about your brand.</h1>
+        <p className="text-[#666] text-base md:text-lg mb-8 md:mb-12">
           We use this to send your benchmark report and connect you with the right
           <br />
           person on our team if you want a deeper diagnostic.
@@ -120,7 +120,7 @@ export default function BrandInfoPage() {
 
         <form onSubmit={handleSubmit} className="space-y-6" noValidate>
           {/* Row 1 — Name + Role */}
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm text-[#666] mb-2">
                 FULL NAME <span className="text-red-500">*</span>
@@ -159,7 +159,7 @@ export default function BrandInfoPage() {
           </div>
 
           {/* Row 2 — Email + Phone */}
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm text-[#666] mb-2">
                 WORK EMAIL <span className="text-red-500">*</span>
@@ -230,7 +230,7 @@ export default function BrandInfoPage() {
           </div>
 
           {/* Category + Orders per month */}
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm text-[#666] mb-2">
                 CATEGORY <span className="text-red-500">*</span>

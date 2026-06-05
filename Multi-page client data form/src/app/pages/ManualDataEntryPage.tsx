@@ -76,15 +76,15 @@ export default function ManualDataEntryPage() {
 
   return (
     <div className="min-h-screen bg-[#f8f6f3]">
-      <header className="px-12 py-6">
+      <header className="px-4 py-4 md:px-12 md:py-6">
         <Logo />
       </header>
 
-      <main className="px-12 py-16 max-w-5xl mx-auto">
+      <main className="px-4 py-8 md:px-12 md:py-16 max-w-5xl mx-auto">
         <div className="text-sm text-[#999] mb-6">03 · TELL US YOUR NUMBERS</div>
 
-        <h1 className="text-4xl mb-4">Manual Benchmark</h1>
-        <p className="text-[#666] text-lg mb-12">
+        <h1 className="text-2xl md:text-4xl mb-4">Manual Benchmark</h1>
+        <p className="text-[#666] text-base md:text-lg mb-8 md:mb-12">
           Six questions, three minutes.
           <br />
           Use rough estimates if you don't have exact figures. We'll benchmark you directionally against the cohort.
@@ -94,7 +94,7 @@ export default function ManualDataEntryPage() {
           <div className="bg-white rounded-2xl p-8 space-y-6">
 
             {/* Row 1 — Category | AOV */}
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm text-[#666] mb-2">Category</label>
                 <select
@@ -121,7 +121,7 @@ export default function ManualDataEntryPage() {
             </div>
 
             {/* Row 2 — OPM | Add to Cart % */}
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm text-[#666] mb-2">Estimated orders / month</label>
                 <input
@@ -149,7 +149,7 @@ export default function ManualDataEntryPage() {
             </div>
 
             {/* Row 3 — Repeat Revenue Share % | Time to 2nd */}
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm text-[#666] mb-2">
                   Repeat revenue share (%) <span className="text-red-500">*</span>
@@ -180,7 +180,7 @@ export default function ManualDataEntryPage() {
             </div>
 
             {/* Row 4 — Tools */}
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               <div>
                 <label className="block text-sm text-[#666] mb-2">Loyalty</label>
                 <select

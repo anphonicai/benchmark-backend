@@ -206,9 +206,9 @@ export default function BenchmarkReportPage() {
     <div className="min-h-screen" style={{ backgroundColor: CREAM, fontFamily: 'inherit' }}>
 
       {/* ── HERO ─────────────────────────────────────────────────────── */}
-      <section style={{ backgroundColor: NAVY }} className="px-12 py-10 print:px-6">
+      <section style={{ backgroundColor: NAVY }} className="px-4 py-6 md:px-12 md:py-10 print:px-6">
         {/* Nav */}
-        <div className="flex items-center justify-between mb-16 print:hidden">
+        <div className="flex items-center justify-between mb-10 md:mb-16 print:hidden">
           <Logo />
           <a
             href="https://drive.google.com/uc?export=download&id=1I7geihmjOueHGG69zHNbki6u8JGydEDL"
@@ -226,20 +226,20 @@ export default function BenchmarkReportPage() {
         </p>
 
         {/* Score + Verdict grid */}
-        <div className="grid grid-cols-2 gap-16 items-center max-w-5xl mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center max-w-5xl mb-8 md:mb-12">
           {/* Score */}
           <div>
-            <div className="flex items-end gap-3 mb-6">
-              <span className="font-light text-white" style={{ fontSize: '9rem', lineHeight: 1, letterSpacing: '-0.04em' }}>
+            <div className="flex items-end gap-3 mb-4 md:mb-6">
+              <span className="font-light text-white" style={{ fontSize: 'clamp(4rem, 18vw, 9rem)', lineHeight: 1, letterSpacing: '-0.04em' }}>
                 {data.shelfScore}
               </span>
-              <span className="text-4xl mb-6 font-light" style={{ color: TEAL }}>/100</span>
+              <span className="text-2xl md:text-4xl mb-4 md:mb-6 font-light" style={{ color: TEAL }}>/100</span>
             </div>
           </div>
 
           {/* Verdict */}
           <div>
-            <h2 className="text-3xl text-white font-normal leading-snug mb-4">
+            <h2 className="text-2xl md:text-3xl text-white font-normal leading-snug mb-4">
               <VerdictHeadline text={data.verdictHeadline} />
             </h2>
             <p className="text-sm leading-relaxed opacity-70 text-white">{data.verdictDescription}</p>
@@ -247,7 +247,7 @@ export default function BenchmarkReportPage() {
         </div>
 
         {/* Percentile strip */}
-        <div className="inline-flex items-center gap-4 px-5 py-2.5 rounded-sm text-sm" style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}>
+        <div className="inline-flex flex-wrap items-center gap-3 px-4 py-2.5 rounded-sm text-sm" style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}>
           <span style={{ color: TEAL }} className="font-medium">{data.percentile}th percentile</span>
           <span className="text-white opacity-40">·</span>
           <span className="text-white opacity-60">
@@ -259,16 +259,16 @@ export default function BenchmarkReportPage() {
       </section>
 
       {/* ── METRICS ──────────────────────────────────────────────────── */}
-      <section style={{ backgroundColor: CREAM }} className="px-12 py-16 print:px-6">
+      <section style={{ backgroundColor: CREAM }} className="px-4 py-10 md:px-12 md:py-16 print:px-6">
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-4xl mb-2" style={{ color: NAVY }}>Metric by metric.</h2>
+          <h2 className="text-3xl md:text-4xl mb-2" style={{ color: NAVY }}>Metric by metric.</h2>
           <p className="text-sm mb-8 opacity-60" style={{ color: NAVY }}>
             Where you sit on each dimension the Shelf Index measures.
             Anonymized cohort of {cohortConfig.cohort_size} brands, {cohortConfig.dataWindow} rolling window.
           </p>
 
           {/* Legend */}
-          <div className="flex items-center gap-6 mb-10 text-xs" style={{ color: NAVY }}>
+          <div className="flex flex-wrap items-center gap-4 md:gap-6 mb-8 md:mb-10 text-xs" style={{ color: NAVY }}>
             <span className="flex items-center gap-2">
               <span className="w-4 h-3 rounded-sm inline-block" style={{ backgroundColor: GOLD }} />
               You
@@ -289,11 +289,16 @@ export default function BenchmarkReportPage() {
               if (m.you === null) return null;
               const segs = getBarSegments(m.you, m.cohort_median, m.top_quartile, m.lowerIsBetter);
               return (
-                <div key={i} className={`flex items-center gap-8 px-8 py-6 bg-white ${i > 0 ? 'border-t' : ''}`} style={{ borderColor: '#EEE8E0' }}>
-                  {/* Label */}
-                  <div className="w-56 flex-shrink-0">
-                    <div className="font-medium text-sm" style={{ color: NAVY }}>{m.label}</div>
-                    <div className="text-xs uppercase tracking-wider opacity-50 mt-0.5" style={{ color: NAVY }}>{m.sublabel}</div>
+                <div key={i} className={`flex flex-col md:flex-row md:items-center gap-3 md:gap-8 px-4 md:px-8 py-5 md:py-6 bg-white ${i > 0 ? 'border-t' : ''}`} style={{ borderColor: '#EEE8E0' }}>
+                  {/* Label + status (status shown inline on mobile) */}
+                  <div className="flex items-start justify-between md:block md:w-56 md:flex-shrink-0">
+                    <div>
+                      <div className="font-medium text-sm" style={{ color: NAVY }}>{m.label}</div>
+                      <div className="text-xs uppercase tracking-wider opacity-50 mt-0.5" style={{ color: NAVY }}>{m.sublabel}</div>
+                    </div>
+                    <div className="md:hidden ml-2 flex-shrink-0">
+                      <StatusLabel isTop={segs.isTop} isAbove={segs.isAbove} />
+                    </div>
                   </div>
 
                   {/* Bar */}
@@ -322,8 +327,8 @@ export default function BenchmarkReportPage() {
                     </div>
                   </div>
 
-                  {/* Status */}
-                  <div className="w-28 text-right flex-shrink-0">
+                  {/* Status — desktop only */}
+                  <div className="hidden md:block w-28 text-right flex-shrink-0">
                     <StatusLabel isTop={segs.isTop} isAbove={segs.isAbove} />
                   </div>
                 </div>
@@ -335,9 +340,9 @@ export default function BenchmarkReportPage() {
 
       {/* ── GAPS ─────────────────────────────────────────────────────── */}
       {data.gaps.length > 0 && (
-        <section style={{ backgroundColor: NAVY }} className="px-12 py-16 print:px-6">
+        <section style={{ backgroundColor: NAVY }} className="px-4 py-10 md:px-12 md:py-16 print:px-6">
           <div className="max-w-5xl mx-auto">
-            <h2 className="text-4xl text-white font-normal mb-3">
+            <h2 className="text-3xl md:text-4xl text-white font-normal mb-3">
               {data.gaps.length === 1 ? 'One gap.' : `${['One','Two','Three'][data.gaps.length - 1] ?? data.gaps.length} gaps.`} Quantified.
             </h2>
             <p className="text-sm opacity-50 text-white mb-12">
@@ -349,7 +354,7 @@ export default function BenchmarkReportPage() {
               {data.gaps.map((gap, i) => {
                 const meta = GAP_META[gap.id];
                 return (
-                  <div key={i} className="flex gap-8 border-l-2 pl-8 py-6" style={{ borderColor: GOLD }}>
+                  <div key={i} className="flex flex-col md:flex-row gap-6 md:gap-8 border-l-2 pl-4 md:pl-8 py-6" style={{ borderColor: GOLD }}>
                     {/* Number + content */}
                     <div className="flex-1">
                       <div className="text-5xl font-light italic mb-4" style={{ color: GOLD, fontFamily: 'Georgia, serif' }}>
@@ -370,7 +375,7 @@ export default function BenchmarkReportPage() {
                     </div>
 
                     {/* Revenue box */}
-                    <div className="flex-shrink-0 w-44 rounded-xl p-6 text-right" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}>
+                    <div className="md:flex-shrink-0 md:w-44 rounded-xl p-5 md:p-6 text-right" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}>
                       <div className="text-xs tracking-widest uppercase mb-3" style={{ color: 'rgba(255,255,255,0.4)' }}>
                         Annual Revenue<br />at Stake
                       </div>
@@ -386,9 +391,9 @@ export default function BenchmarkReportPage() {
       )}
 
       {/* ── CTA ──────────────────────────────────────────────────────── */}
-      <section style={{ backgroundColor: CREAM }} className="px-12 py-20 text-center print:hidden">
+      <section style={{ backgroundColor: CREAM }} className="px-4 py-12 md:px-12 md:py-20 text-center print:hidden">
         <div className="max-w-2xl mx-auto">
-          <h2 className="text-5xl font-normal leading-tight mb-4" style={{ color: NAVY }}>
+          <h2 className="text-3xl md:text-5xl font-normal leading-tight mb-4" style={{ color: NAVY }}>
             Want us to walk you through<br />
             your <em style={{ color: TEAL, fontStyle: 'italic' }}>full diagnostic?</em>
           </h2>
@@ -397,7 +402,7 @@ export default function BenchmarkReportPage() {
             close each gap, and whether Anphonic's managed model fits where you are.
           </p>
 
-          <div className="flex items-center justify-center gap-4 mb-8">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
             <a
               href="https://www.anphonic.ai/"
               target="_blank" rel="noopener noreferrer"

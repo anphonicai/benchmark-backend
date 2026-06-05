@@ -4,7 +4,7 @@ import cohortConfig from "../utils/cohortConfig";
 export default function MethodologyPage() {
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
-      <header className="px-12 py-6">
+      <header className="px-4 py-4 md:px-12 md:py-6">
         <Logo />
       </header>
 
@@ -15,7 +15,7 @@ export default function MethodologyPage() {
           <p className="text-xs font-semibold tracking-widest text-[#1C9393] mb-4 uppercase">
             Methodology
           </p>
-          <h1 className="text-5xl font-semibold leading-tight tracking-tight text-[#1A1A1A] mb-6">
+          <h1 className="text-3xl md:text-5xl font-semibold leading-tight tracking-tight text-[#1A1A1A] mb-6">
             How your benchmark is calculated
           </h1>
           <p className="text-lg leading-relaxed text-[#4B5563] max-w-2xl">
@@ -26,7 +26,7 @@ export default function MethodologyPage() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 gap-4 mb-14">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-14">
           <div className="bg-white border border-[#E8EAED] rounded-xl p-6">
             <p className="text-xs font-semibold uppercase tracking-widest text-[#6B7280] mb-2">Cohort size</p>
             <p className="text-2xl font-semibold text-[#1C9393] mb-3">{cohortConfig.cohort_size} brands</p>

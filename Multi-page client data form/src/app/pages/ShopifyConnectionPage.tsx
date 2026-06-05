@@ -19,14 +19,14 @@ export default function ShopifyConnectionPage() {
   return (
     <div className="min-h-screen bg-[#f8f6f3]">
       {/* Header */}
-      <header className="px-12 py-6">
+      <header className="px-4 py-4 md:px-12 md:py-6">
         <Logo />
       </header>
 
       {/* Main Content */}
-      <main className="px-12 py-16 max-w-2xl mx-auto">
+      <main className="px-4 py-8 md:px-12 md:py-16 max-w-2xl mx-auto">
         {/* Title */}
-        <h1 className="text-4xl mb-4">Shopify Benchmark</h1>
+        <h1 className="text-2xl md:text-4xl mb-4">Shopify Benchmark</h1>
         <p className="text-[#666] text-lg mb-12">
           Paste a Shopify access token and store domain to fetch benchmark metrics for one store.
         </p>

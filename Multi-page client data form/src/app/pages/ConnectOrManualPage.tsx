@@ -8,25 +8,25 @@ export default function ConnectOrManualPage() {
   return (
     <div className="min-h-screen bg-[#f8f6f3]">
       {/* Header */}
-      <header className="px-12 py-6">
+      <header className="px-4 py-4 md:px-12 md:py-6">
         <Logo />
       </header>
 
       {/* Main Content */}
-      <main className="px-12 py-16 max-w-5xl mx-auto">
+      <main className="px-4 py-8 md:px-12 md:py-16 max-w-5xl mx-auto">
         {/* Step Indicator */}
         <div className="text-sm text-[#999] mb-6">02 · HOW SHOULD WE PULL YOUR DATA?</div>
 
         {/* Title */}
-        <h1 className="text-5xl mb-4">Connect Shopify, or enter manually.</h1>
-        <p className="text-[#666] text-lg mb-16">
+        <h1 className="text-3xl md:text-5xl mb-4">Connect Shopify, or enter manually.</h1>
+        <p className="text-[#666] text-base md:text-lg mb-10 md:mb-16">
           Connecting gives you a precise benchmark using real order and customer data.
           <br />
           Manual entry takes 3 minutes and is less precise.
         </p>
 
         {/* Options */}
-        <div className="grid grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
           {/* Connect Shopify Option — Coming Soon */}
           <div className="relative bg-white border-2 border-[#d4d4d4] rounded-2xl p-8 cursor-not-allowed opacity-60">
             {/* Coming Soon Badge */}
