@@ -7,7 +7,7 @@ const router = express.Router();
 
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
-const SHOPIFY_HEADERS = ['x-shopid', 'x-shopify-stage', 'x-shardid', 'x-sorting-hat-podid'];
+const SHOPIFY_HEADERS = ['x-shopid', 'x-shopify-stage', 'x-shardid', 'x-sorting-hat-podid', 'shopify-complexity-score'];
 const BLOCKLISTED_HOSTS = /localhost|127\.0\.0\.1|0\.0\.0\.0|192\.168\.|^10\.|example\.com|test\.com/i;
 
 const isEmptyValue = (value) => value === undefined || value === null || value === '';
@@ -663,7 +663,13 @@ router.get('/validate-shopify-url', async (req, res) => {
     }
 
     // Check Shopify-specific response headers (works for stores not behind a CDN)
-    if (SHOPIFY_HEADERS.some((h) => response.headers.has(h))) {
+    const isShopifyByHeaders =
+      SHOPIFY_HEADERS.some((h) => response.headers.has(h)) ||
+      (response.headers.get('powered-by') || '').toLowerCase().includes('shopify') ||
+      (response.headers.get('x-powered-by') || '').toLowerCase().includes('shopify') ||
+      (response.headers.get('link') || '').includes('cdn.shopify.com');
+
+    if (isShopifyByHeaders) {
       return res.status(200).json({ success: true, isShopify: true });
     }
 
