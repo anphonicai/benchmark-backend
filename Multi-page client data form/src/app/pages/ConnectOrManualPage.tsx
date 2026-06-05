@@ -27,18 +27,20 @@ export default function ConnectOrManualPage() {
 
         {/* Options */}
         <div className="grid grid-cols-2 gap-8">
-          {/* Connect Shopify Option */}
-          <div
-            onClick={() => navigate("/shopify-connect")}
-            className="relative bg-white border-2 border-[#d4d4d4] rounded-2xl p-8 cursor-pointer hover:shadow-lg transition-shadow hover:border-[#999]"
-          >
+          {/* Connect Shopify Option — Coming Soon */}
+          <div className="relative bg-white border-2 border-[#d4d4d4] rounded-2xl p-8 cursor-not-allowed opacity-60">
+            {/* Coming Soon Badge */}
+            <div className="absolute -top-3 left-8 bg-[#999] text-white text-xs px-3 py-1 rounded-full">
+              COMING SOON
+            </div>
+
             {/* Icon */}
-            <div className="w-14 h-14 bg-[#10b981] rounded-xl flex items-center justify-center mb-6">
+            <div className="w-14 h-14 bg-[#ccc] rounded-xl flex items-center justify-center mb-6">
               <ShoppingBag className="w-7 h-7 text-white" />
             </div>
 
             {/* Title */}
-            <h2 className="text-2xl mb-3">Connect Shopify</h2>
+            <h2 className="text-2xl mb-3 text-[#999]">Connect Shopify</h2>
 
             {/* Description */}
             <p className="text-[#666] mb-8">

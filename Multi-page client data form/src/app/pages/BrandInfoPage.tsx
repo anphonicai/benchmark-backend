@@ -37,22 +37,20 @@ export default function BrandInfoPage() {
 
     if (!formData.email.trim()) e.email = "Work email is required.";
 
-    // Phone: exactly 10 digits (strip spaces/dashes first)
-    const digits = formData.phone.replace(/\D/g, "");
+    // Phone: required check only — format validation happens on the backend
     if (!formData.phone.trim()) {
       e.phone = "Phone number is required.";
-    } else if (digits.length !== 10) {
-      e.phone = "Phone number must be exactly 10 digits.";
     }
 
     if (!formData.brandName.trim()) e.brandName = "Brand name is required.";
 
-    // Shopify URL: must end with .myshopify.com
-    const shopify = formData.shopifyUrl.trim().toLowerCase().replace(/^https?:\/\//, "");
-    if (!formData.shopifyUrl.trim()) {
+    // Shopify URL: must start with https:// or www.
+    const shopifyTrimmed = formData.shopifyUrl.trim();
+    const validShopify = /^(https?:\/\/|www\.)\S+\.\S+/.test(shopifyTrimmed);
+    if (!shopifyTrimmed) {
       e.shopifyUrl = "Shopify store URL is required.";
-    } else if (!shopify.endsWith(".myshopify.com")) {
-      e.shopifyUrl = "Please enter a valid Shopify URL ending in .myshopify.com (e.g. yourbrand.myshopify.com)";
+    } else if (!validShopify) {
+      e.shopifyUrl = "Please enter a valid URL starting with https:// or www. (e.g. https://yourbrand.com)";
     }
 
     if (!formData.category) e.category = "Please select a category.";
@@ -93,8 +91,13 @@ export default function BrandInfoPage() {
       .then((data) => {
         if (data && data.success) {
           try { localStorage.setItem('companyId', String(data.companyId)); } catch {}
+          navigate("/connect-or-manual");
+        } else if (data && data.field) {
+          // Backend field-level error (e.g. invalid phone)
+          setErrors((prev) => ({ ...prev, [data.field]: data.message }));
+        } else {
+          navigate("/connect-or-manual");
         }
-        navigate("/connect-or-manual");
       })
       .catch(() => navigate("/connect-or-manual"));
   };
@@ -181,13 +184,12 @@ export default function BrandInfoPage() {
                 maxLength={10}
                 value={formData.phone}
                 onChange={(e) => {
-                  const val = e.target.value.replace(/\D/g, "").slice(0, 10);
+                  const val = e.target.value.replace(/[^\d+\s\-]/g, "").slice(0, 15);
                   setFormData({ ...formData, phone: val });
                 }}
                 onBlur={() => handleBlur("phone")}
                 className={inputClass(errors.phone)}
               />
-              <p className="text-xs text-[#999] mt-1">10-digit mobile number</p>
               {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
             </div>
           </div>
@@ -215,14 +217,14 @@ export default function BrandInfoPage() {
             </label>
             <input
               type="text"
-              placeholder="yourbrand.myshopify.com"
+              placeholder="https://yourbrand.com or www.yourbrand.com"
               value={formData.shopifyUrl}
               onChange={(e) => setFormData({ ...formData, shopifyUrl: e.target.value })}
               onBlur={() => handleBlur("shopifyUrl")}
               className={inputClass(errors.shopifyUrl)}
             />
             <p className="text-sm text-[#999] mt-2">
-              Must end in .myshopify.com — e.g. yourbrand.myshopify.com
+              Must start with https:// or www. — e.g. https://yourbrand.com
             </p>
             {errors.shopifyUrl && <p className="text-red-500 text-xs mt-1">{errors.shopifyUrl}</p>}
           </div>

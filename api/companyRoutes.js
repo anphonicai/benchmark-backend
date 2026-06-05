@@ -499,6 +499,25 @@ router.post('/brand-info', async (req, res) => {
     });
   }
 
+  // Phone validation: Indian mobile numbers only
+  // Must be 10 digits starting with 6, 7, 8, or 9
+  // Accepts: 9876543210 | +91 9876543210 | 0 9876543210
+  if (phone) {
+    const digits = String(phone).replace(/\D/g, '');
+    let core = digits;
+    if (digits.length === 12 && digits.startsWith('91')) core = digits.slice(2);
+    if (digits.length === 11 && digits.startsWith('0')) core = digits.slice(1);
+
+    const validIndianMobile = core.length === 10 && /^[6-9]\d{9}$/.test(core);
+    if (!validIndianMobile) {
+      return res.status(400).json({
+        success: false,
+        field: 'phone',
+        message: 'Please enter a valid Indian mobile number.',
+      });
+    }
+  }
+
   try {
     const result = await pool.query(
       `INSERT INTO companies (company_name, website, tier, contact_name, contact_email, phone, cluster, category, shopify_store_url)

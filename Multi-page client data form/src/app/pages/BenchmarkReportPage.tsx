@@ -1,260 +1,181 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Logo from "../components/Logo";
-import { ArrowUpRight, Download, AlertTriangle, Zap } from "lucide-react";
 import cohortConfig from "../utils/cohortConfig";
 
 // ── Types ────────────────────────────────────────────────────────────────
 interface Gap {
+  id: string;
   title: string;
   revenueAtStake: string;
-  revenuePerYear: string;
-  effort: string;
-  timeline: string;
   description: string;
-  recommendedAction: string;
+  additionalInfo: string;
 }
-
 interface Metric {
-  name: string;
-  description: string;
-  yourValue: string | number;
-  cohortMedian: string | number;
-  topQuartile: string | number;
-  yourPosition: number;
-  medianPosition: number;
-  topQuartilePosition: number;
-  status: "above" | "below";
+  key: string;
+  label: string;
+  sublabel: string;
+  unit: string;
+  you: number | null;
+  cohort_median: number;
+  top_quartile: number;
+  verdict: string;
+  lowerIsBetter: boolean;
 }
-
-interface NewBenchmarkData {
+interface ReportData {
   brandName: string;
   category: string;
   shelfScore: number;
-  scoreLabel: string;
-  scoreColor: string;
-  percentile: string;
-  percentileText: string;
-  verdictTitle: string;
+  percentile: number;
+  verdictHeadline: string;
   verdictDescription: string;
-  cohortStage: number;
   metrics: Metric[];
   gaps: Gap[];
-  totalRevenueAtStake: string;
-  cohortSize: number;
-  cohortDescription: string;
-  dataWindow: string;
-  dataWindowDescription: string;
-  source: string;
-  sourceEdition: string;
+  totalRevenueAtStake: number;
+  refCode: string;
 }
 
-// ── Gap metadata ─────────────────────────────────────────────────────────
-const GAP_META: Record<string, { effort: string; timeline: string; action: string }> = {
-  missing_reorder_page: {
-    effort: 'Medium effort',
-    timeline: '2-4 weeks',
-    action: 'Build a dedicated /reorder page or use Rebuy Smart Cart reorder list to capture returning customers.',
-  },
-  missing_loyalty_program: {
-    effort: 'Medium effort',
-    timeline: '2-4 weeks',
-    action: 'Set up Nector or POPcoins — most brands go live in under 3 weeks with significant repeat rate uplift.',
-  },
-  missing_post_purchase_upsell: {
-    effort: 'Low effort',
-    timeline: '1-2 weeks',
-    action: 'Add a one-click thank-you page offer via Rebuy, Zipify, or AfterSell. Start with your top-selling SKU.',
-  },
-  missing_whatsapp_optin: {
-    effort: 'Low effort',
-    timeline: '1 week',
-    action: 'Launch a Day-21 WhatsApp Reorder URL flow via Interakt, Wati, or Kwick Engage. Single flow, big impact.',
-  },
+// ── Gap metadata ──────────────────────────────────────────────────────────
+const GAP_META: Record<string, { action: string }> = {
+  missing_reorder_page: { action: 'Build a dedicated /reorder page or use Rebuy Smart Cart reorder flow to capture returning customers.' },
+  missing_loyalty_program: { action: 'Set up Nector or POPcoins — most brands go live in under 3 weeks with significant repeat rate uplift.' },
+  missing_post_purchase_upsell: { action: 'Add a one-click thank-you page offer via Rebuy, Zipify, or AfterSell. Start with your top-selling SKU.' },
+  missing_whatsapp_optin: { action: 'Launch a Day-21 WhatsApp Reorder URL flow via Interakt, Wati, or Kwick Engage. Single flow, big impact.' },
 };
 
-// ── Score helpers ─────────────────────────────────────────────────────────
-const getScoreLabel = (score: number) =>
-  score >= 70 ? 'Strong' : score >= 50 ? 'Building' : score >= 30 ? 'Developing' : 'Early Stage';
-
-const getScoreColor = (score: number) =>
-  score >= 70 ? '#44dd44' : score >= 50 ? '#ffdd00' : score >= 30 ? '#ffaa00' : '#ff4444';
-
-// ── Position helpers (0-100 scale for bar chart) ─────────────────────────
-const calcPositions = (
-  yourRaw: number,
-  medianRaw: number,
-  topQRaw: number,
-  lowerIsBetter: boolean
-) => {
+// ── Bar segments calculation ──────────────────────────────────────────────
+function getBarSegments(you: number, median: number, topQ: number, lowerIsBetter: boolean) {
   if (lowerIsBetter) {
-    // Higher value = more bar = visually worse (raw days on scale)
-    const max = Math.max(yourRaw, medianRaw) * 1.5;
+    const maxRef = Math.max(you, median) * 1.5;
+    const yourPerf  = Math.round(((maxRef - you)  / maxRef) * 100);
+    const medPerf   = Math.round(((maxRef - median) / maxRef) * 100);
+    const topPerf   = Math.round(((maxRef - topQ)  / maxRef) * 100);
+    const isAbove   = you <= median;
     return {
-      yourPosition: Math.round(Math.min(95, (yourRaw / max) * 100)),
-      medianPosition: Math.round(Math.min(95, (medianRaw / max) * 100)),
-      topQuartilePosition: Math.round(Math.min(95, (topQRaw / max) * 100)),
+      gold:  Math.min(yourPerf, 92),
+      grey:  isAbove ? 0 : Math.max(0, medPerf - yourPerf),
+      tealStart: Math.min(medPerf, 90),
+      tealWidth: Math.max(0, Math.min(topPerf - medPerf, 90 - medPerf)),
+      isAbove,
+      isTop: you <= topQ,
     };
   }
-  // Percentage metric: use raw value directly (already 0-100 scale)
+  const maxRef  = topQ * 1.3;
+  const yourW   = Math.round((you  / maxRef) * 100);
+  const medW    = Math.round((median / maxRef) * 100);
+  const topW    = Math.round((topQ / maxRef) * 100);
+  const isAbove = you >= median;
+  const isTop   = you >= topQ;
   return {
-    yourPosition: Math.round(Math.max(2, Math.min(95, yourRaw))),
-    medianPosition: Math.round(Math.max(2, Math.min(95, medianRaw))),
-    topQuartilePosition: Math.round(Math.max(2, Math.min(95, topQRaw))),
+    gold:  Math.min(yourW, 92),
+    grey:  isAbove ? 0 : Math.max(0, medW - yourW),
+    tealStart: Math.min(medW, 90),
+    tealWidth: Math.max(0, Math.min(topW - medW, 90 - medW)),
+    isAbove,
+    isTop,
   };
+}
+
+// ── Status label ──────────────────────────────────────────────────────────
+function StatusLabel({ isTop, isAbove }: { isTop: boolean; isAbove: boolean }) {
+  if (isTop) return <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: '#2CC5B0' }}>Top Quartile</span>;
+  if (isAbove) return <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: '#2CC5B0' }}>Above Cohort</span>;
+  return <span className="text-xs font-semibold tracking-widest uppercase text-red-400">Below Cohort</span>;
+}
+
+// ── Default / fallback data ───────────────────────────────────────────────
+const defaultData: ReportData = {
+  brandName: 'Your Brand',
+  category: 'Overall',
+  shelfScore: 47,
+  percentile: 34,
+  verdictHeadline: 'Your retention engine is in second gear.',
+  verdictDescription: "You're acquiring well, but customers aren't coming back at the rate top quartile brands manage. Three specific gaps drive most of the difference. We've quantified each below.",
+  metrics: [
+    { key: 'repeat_revenue_pct', label: 'Revenue from repeat customers', sublabel: '90 day window', unit: '%', you: 28, cohort_median: 40, top_quartile: 64, verdict: 'below', lowerIsBetter: false },
+    { key: 'time_to_2nd_order_days', label: 'Time to second order', sublabel: 'Median days', unit: ' days', you: 23, cohort_median: 21, top_quartile: 14, verdict: 'below', lowerIsBetter: true },
+  ],
+  gaps: [
+    { id: 'missing_post_purchase_upsell', title: 'No post-purchase upsell flow.', revenueAtStake: '₹18.4L', description: 'Top quartile brands capture 14% to 22% of post-purchase visits with a one-click upsell or thank-you-page offer. You show a static thank-you page.', additionalInfo: 'Cohort data shows post-purchase AOV uplift averages 8 to 12% when implemented well.' },
+    { id: 'missing_loyalty_program', title: 'No loyalty program live.', revenueAtStake: '₹42.6L', description: 'Top quartile F&B brands run Nector or POPcoins with redemption rates of 11% to 18%. Their repeat rate sits 14 points above cohort median. You have no loyalty system.', additionalInfo: 'Closing this is the single highest-leverage move for brands in your bracket.' },
+    { id: 'missing_whatsapp_optin', title: 'WhatsApp opt-in below cohort.', revenueAtStake: '₹11.2L', description: 'Top quartile brands capture 45% to 60% of buyers into WhatsApp via checkout opt-in. You use a tool but lack the checkout-stage opt-in flow.', additionalInfo: 'Cohort data shows WhatsApp drives 22% of repeat revenue at top quartile brands.' },
+  ],
+  totalRevenueAtStake: 7220000,
+  refCode: 'ABM-2026-0001',
 };
 
-// ── Map API response → NewBenchmarkData ───────────────────────────────────
-function mapReport(report: any, brandInfo: any): NewBenchmarkData {
-  const shelfScore = report.shelf_score ?? report.shelfScore ?? 0;
-  const percentileNum =
-    typeof report.percentile === 'number' ? report.percentile : parseInt(report.percentile) || 0;
+// ── Map raw API response → ReportData ─────────────────────────────────────
+function mapReport(parsed: any, brandInfo: any): ReportData {
+  const report = parsed.report ?? parsed;
+  const shelfScore = report.shelf_score ?? 0;
+  const percentile = typeof report.percentile === 'number' ? report.percentile : parseInt(report.percentile) || 0;
+
+  const metrics: Metric[] = Array.isArray(report.metrics_vs_cohort)
+    ? report.metrics_vs_cohort
+        .filter((m: any) => !['rebuy_revenue_share_pct', 'personalisation_aov_lift_pct'].includes(m.key))
+        .map((m: any) => ({
+          key: m.key,
+          label: m.label ?? '',
+          sublabel: m.sublabel ?? '',
+          unit: m.unit ?? '',
+          you: m.you !== null && m.you !== undefined ? Number(m.you) : null,
+          cohort_median: Number(m.cohort_median ?? 0),
+          top_quartile: Number(m.top_quartile ?? 0),
+          verdict: m.verdict ?? 'below',
+          lowerIsBetter: m.key === 'time_to_2nd_order_days',
+        }))
+    : defaultData.metrics;
 
   const gaps: Gap[] = Array.isArray(report.gaps)
     ? report.gaps
         .filter((g: any) => g.id !== 'underutilised_rebuy')
-        .map((g: any) => {
-          const meta = GAP_META[g.id] || {
-            effort: 'Medium effort',
-            timeline: '2-4 weeks',
-            action: 'Review with your growth team.',
-          };
-          const rev = g.revenue_at_stake_inr
+        .map((g: any) => ({
+          id: g.id ?? 'unknown',
+          title: g.title ?? '',
+          revenueAtStake: g.revenue_at_stake_inr
             ? `₹${(g.revenue_at_stake_inr / 100000).toFixed(1)}L`
-            : g.revenueAtStake ?? '';
-          return {
-            title: g.title ?? '',
-            revenueAtStake: rev,
-            revenuePerYear: rev,
-            effort: meta.effort,
-            timeline: meta.timeline,
-            description: g.comparison ?? g.description ?? '',
-            recommendedAction: meta.action,
-          };
-        })
-    : [];
+            : '',
+          description: g.comparison ?? g.description ?? '',
+          additionalInfo: g.cohort_data ?? '',
+        }))
+    : defaultData.gaps;
 
-  const metrics: Metric[] = Array.isArray(report.metrics_vs_cohort)
-    ? report.metrics_vs_cohort
-        .filter(
-          (m: any) =>
-            !['rebuy_revenue_share_pct', 'personalisation_aov_lift_pct', 'repeat_rate_90d_pct'].includes(m.key)
-        )
-        .map((m: any) => {
-          const yourRaw = m.you !== null && m.you !== undefined ? Number(m.you) : null;
-          const medianRaw = Number(m.cohort_median ?? 0);
-          const topQRaw = Number(m.top_quartile ?? 0);
-          const unit = m.unit ?? '';
-          const lowerIsBetter = m.key === 'time_to_2nd_order_days';
-          const verdict = m.verdict ?? 'below';
-          const status: 'above' | 'below' =
-            verdict === 'top' || verdict === 'above' ? 'above' : 'below';
-
-          const positions =
-            yourRaw !== null
-              ? calcPositions(yourRaw, medianRaw, topQRaw, lowerIsBetter)
-              : { yourPosition: 2, medianPosition: 50, topQuartilePosition: 75 };
-
-          return {
-            name: m.label ?? '',
-            description: m.sublabel ?? '',
-            yourValue: yourRaw !== null ? `${yourRaw}${unit}` : '--',
-            cohortMedian: `${medianRaw}${unit}`,
-            topQuartile: `${topQRaw}${unit}`,
-            ...positions,
-            status,
-          };
-        })
-    : [];
-
-  const totalRev = report.total_revenue_at_stake_inr
-    ? `₹${(report.total_revenue_at_stake_inr / 100000).toFixed(1)}L`
-    : '₹0L';
+  const now = new Date();
+  const refCode = `ABM-${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
 
   return {
     brandName: brandInfo.brandName || report.input?.company_name || 'Your Brand',
     category: report.category_used || brandInfo.category || 'Overall',
     shelfScore,
-    scoreLabel: getScoreLabel(shelfScore),
-    scoreColor: getScoreColor(shelfScore),
-    percentile: `${percentileNum}th`,
-    percentileText: `Among ${report.methodology?.cohort_size ?? 13} India D2C brands benchmarked`,
-    verdictTitle: report.verdict?.headline ?? '',
-    verdictDescription: report.verdict?.cohort_comparison ?? '',
-    cohortStage: Math.min(95, Math.max(2, shelfScore)),
+    percentile,
+    verdictHeadline: report.verdict?.headline ?? defaultData.verdictHeadline,
+    verdictDescription: report.verdict?.cohort_comparison ?? defaultData.verdictDescription,
     metrics,
     gaps,
-    totalRevenueAtStake: totalRev,
-    cohortSize: report.methodology?.cohort_size ?? 13,
-    cohortDescription: 'India based, Shopify-native',
-    dataWindow: report.methodology?.window_days ? `${report.methodology.window_days} days` : '90 days',
-    dataWindowDescription: 'Rolling cohort period',
-    source: 'The Shelf Index',
-    sourceEdition: 'Edition 01 · Anphonic, 2026',
+    totalRevenueAtStake: report.total_revenue_at_stake_inr ?? 0,
+    refCode,
   };
 }
 
-// ── Default data ──────────────────────────────────────────────────────────
-const defaultData: NewBenchmarkData = {
-  brandName: 'Your Brand',
-  category: 'Overall',
-  shelfScore: 7,
-  scoreLabel: 'Early Stage',
-  scoreColor: '#ff4444',
-  percentile: '5th',
-  percentileText: 'Among 13 India D2C brands benchmarked',
-  verdictTitle: 'Your retention engine has not been switched on.',
-  verdictDescription:
-    'The cohort runs in fourth gear on average. The good news: every gap below is a documented, fixable pattern from the Shelf Index data.',
-  cohortStage: 15,
-  metrics: [
-    {
-      name: 'Revenue from repeat customers',
-      description: 'trailing 90 days',
-      yourValue: '3%',
-      cohortMedian: '40%',
-      topQuartile: '64%',
-      yourPosition: 3,
-      medianPosition: 40,
-      topQuartilePosition: 64,
-      status: 'below',
-    },
-    {
-      name: 'Time to second order',
-      description: 'median',
-      yourValue: '32 days',
-      cohortMedian: '21 days',
-      topQuartile: '14 days',
-      yourPosition: 65,
-      medianPosition: 43,
-      topQuartilePosition: 28,
-      status: 'below',
-    },
-  ],
-  gaps: [
-    {
-      title: 'No Reorder Page live.',
-      revenueAtStake: '₹9.6L',
-      revenuePerYear: '₹9.6L',
-      effort: 'Medium effort',
-      timeline: '2-4 weeks',
-      description:
-        'Top quartile brands in your cohort run a dedicated /reorder page that captures 3-4x the conversion of a generic home page. You currently route returning customers through the same flow as new visitors.',
-      recommendedAction:
-        'Build a dedicated /reorder page or use Rebuy Smart Cart reorder list to capture returning customers.',
-    },
-  ],
-  totalRevenueAtStake: '₹9.6L',
-  cohortSize: 13,
-  cohortDescription: 'India based, Shopify-native',
-  dataWindow: '90 days',
-  dataWindowDescription: 'Rolling cohort period',
-  source: 'The Shelf Index',
-  sourceEdition: 'Edition 01 · Anphonic, 2026',
-};
+// ── Verdict headline with italic colored keyword ───────────────────────────
+function VerdictHeadline({ text }: { text: string }) {
+  // Italicise the gear phrase e.g. "second gear"
+  const match = text.match(/(.*?)([\w]+ gear)(.*)/i);
+  if (!match) return <span>{text}</span>;
+  return (
+    <>
+      {match[1]}
+      <em style={{ color: '#D4A54A', fontStyle: 'italic' }}>{match[2]}</em>
+      {match[3]}
+    </>
+  );
+}
 
 // ── Component ─────────────────────────────────────────────────────────────
 export default function BenchmarkReportPage() {
-  const [benchmarkData, setBenchmarkData] = useState<NewBenchmarkData>(defaultData);
+  const [data, setData] = useState<ReportData>(defaultData);
+  const generatedRef = useRef(
+    new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase()
+  );
 
   useEffect(() => {
     try {
@@ -263,284 +184,244 @@ export default function BenchmarkReportPage() {
       if (!raw) return;
       const parsed = JSON.parse(raw);
       const brandInfo = brandInfoRaw ? JSON.parse(brandInfoRaw) : {};
-      const report = parsed.report ?? parsed;
-      const mapped = mapReport(report, brandInfo);
-      setBenchmarkData(mapped);
-    } catch (e) {
-      console.warn('Failed to load benchmark data', e);
-    }
+      setData(mapReport(parsed, brandInfo));
+    } catch { /* keep default */ }
   }, []);
 
   useEffect(() => {
-    document.title = `Anphonic.ai Benchmark — ${benchmarkData.brandName}`;
+    document.title = `Anphonic.ai Benchmark — ${data.brandName}`;
     return () => { document.title = 'Anphonic.ai Benchmark'; };
-  }, [benchmarkData.brandName]);
+  }, [data.brandName]);
 
-  const scorePercentage = (benchmarkData.shelfScore / 100) * 360;
-  const circumference = 2 * Math.PI * 88;
-  const dashArray = (scorePercentage / 360) * circumference;
+  const totalL = data.totalRevenueAtStake > 0
+    ? `₹${(data.totalRevenueAtStake / 100000).toFixed(1)}L`
+    : data.gaps.reduce((s, g) => s, '');
+
+  const NAVY = '#0B1829';
+  const GOLD = '#D4A54A';
+  const TEAL = '#2CC5B0';
+  const CREAM = '#F5EDE3';
 
   return (
-    <div className="min-h-screen bg-[#f8f6f3] print:bg-white">
-      <header className="px-12 py-6 print:hidden">
-        <Logo />
-      </header>
+    <div className="min-h-screen" style={{ backgroundColor: CREAM, fontFamily: 'inherit' }}>
 
-      <main className="px-12 py-16 max-w-5xl mx-auto print:px-4 print:py-4">
-        {/* Top Info */}
-        <div className="mb-12">
-          <p className="text-xs text-[#999] uppercase tracking-wider mb-4">
-            THE SHELF INDEX · EDITION 01 · ANPHONIC
+      {/* ── HERO ─────────────────────────────────────────────────────── */}
+      <section style={{ backgroundColor: NAVY }} className="px-12 py-10 print:px-6">
+        {/* Nav */}
+        <div className="flex items-center justify-between mb-16 print:hidden">
+          <Logo />
+          <a
+            href="https://drive.google.com/uc?export=download&id=1I7geihmjOueHGG69zHNbki6u8JGydEDL"
+            target="_blank" rel="noopener noreferrer"
+            className="text-xs tracking-widest border px-4 py-2 rounded transition-opacity hover:opacity-70"
+            style={{ color: TEAL, borderColor: TEAL }}
+          >
+            DOWNLOAD SHELF INDEX
+          </a>
+        </div>
+
+        {/* Generated label */}
+        <p className="text-xs tracking-widest mb-10 opacity-50 text-white uppercase">
+          Your Benchmark · Generated {generatedRef.current}
+        </p>
+
+        {/* Score + Verdict grid */}
+        <div className="grid grid-cols-2 gap-16 items-center max-w-5xl mb-12">
+          {/* Score */}
+          <div>
+            <div className="flex items-end gap-3 mb-6">
+              <span className="font-light text-white" style={{ fontSize: '9rem', lineHeight: 1, letterSpacing: '-0.04em' }}>
+                {data.shelfScore}
+              </span>
+              <span className="text-4xl mb-6 font-light" style={{ color: TEAL }}>/100</span>
+            </div>
+          </div>
+
+          {/* Verdict */}
+          <div>
+            <h2 className="text-3xl text-white font-normal leading-snug mb-4">
+              <VerdictHeadline text={data.verdictHeadline} />
+            </h2>
+            <p className="text-sm leading-relaxed opacity-70 text-white">{data.verdictDescription}</p>
+          </div>
+        </div>
+
+        {/* Percentile strip */}
+        <div className="inline-flex items-center gap-4 px-5 py-2.5 rounded-sm text-sm" style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}>
+          <span style={{ color: TEAL }} className="font-medium">{data.percentile}th percentile</span>
+          <span className="text-white opacity-40">·</span>
+          <span className="text-white opacity-60">
+            {data.percentile < 50 ? 'below median' : data.percentile < 75 ? 'above median' : 'top quartile'}
+          </span>
+          <span className="text-white opacity-40">·</span>
+          <span className="text-white opacity-60 capitalize">{data.category} cohort, India</span>
+        </div>
+      </section>
+
+      {/* ── METRICS ──────────────────────────────────────────────────── */}
+      <section style={{ backgroundColor: CREAM }} className="px-12 py-16 print:px-6">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-4xl mb-2" style={{ color: NAVY }}>Metric by metric.</h2>
+          <p className="text-sm mb-8 opacity-60" style={{ color: NAVY }}>
+            Where you sit on each dimension the Shelf Index measures.
+            Anonymized cohort of {cohortConfig.cohort_size} brands, {cohortConfig.dataWindow} rolling window.
           </p>
-          <h1 className="text-5xl mb-3">{benchmarkData.brandName}</h1>
-        </div>
 
-        {/* Cohort caption pill */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#F0FAFA] border border-[#CCE8E8] rounded-full text-xs font-medium text-[#1C9393] tracking-wide mb-6">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#30B4B7] flex-shrink-0" />
-          Benchmarked against {cohortConfig.cohort_size} Indian D2C brands · {cohortConfig.tracked_value} tracked · {cohortConfig.data_window_full}
-        </div>
-
-        {/* Score Card */}
-        <div className="bg-white rounded-2xl p-12 mb-8 shadow-sm">
-          <div className="grid grid-cols-[280px_1fr] gap-16">
-            {/* Score Circle */}
-            <div className="flex flex-col items-center">
-              <div className="relative w-48 h-48">
-                <svg className="w-full h-full transform -rotate-90">
-                  <circle cx="96" cy="96" r="88" stroke="#f0f0f0" strokeWidth="16" fill="none" />
-                  <circle
-                    cx="96" cy="96" r="88"
-                    stroke={benchmarkData.scoreColor}
-                    strokeWidth="16"
-                    fill="none"
-                    strokeDasharray={`${dashArray} ${circumference}`}
-                    strokeLinecap="round"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-7xl">{benchmarkData.shelfScore}</div>
-                </div>
-              </div>
-              <div className="mt-6 text-center">
-                <div className="text-sm mb-1" style={{ color: benchmarkData.scoreColor }}>
-                  {benchmarkData.scoreLabel}
-                </div>
-                <div className="text-xs text-[#999]">Shelf Score</div>
-              </div>
-            </div>
-
-            {/* Percentile & Verdict */}
-            <div className="flex flex-col justify-center">
-              <div className="mb-8">
-                <div className="text-xs text-[#999] uppercase tracking-wider mb-2">COHORT PERCENTILE</div>
-                <div className="text-6xl mb-2">{benchmarkData.percentile}</div>
-              </div>
-              <div>
-                <div className="text-xs text-[#999] uppercase tracking-wider mb-3">VERDICT</div>
-                <p className="text-lg mb-3"><strong>{benchmarkData.verdictTitle}</strong></p>
-                <p className="text-[#666]">{benchmarkData.verdictDescription}</p>
-              </div>
-            </div>
+          {/* Legend */}
+          <div className="flex items-center gap-6 mb-10 text-xs" style={{ color: NAVY }}>
+            <span className="flex items-center gap-2">
+              <span className="w-4 h-3 rounded-sm inline-block" style={{ backgroundColor: GOLD }} />
+              You
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="w-4 h-3 rounded-sm inline-block bg-gray-400" />
+              Cohort median
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="w-4 h-3 rounded-sm inline-block" style={{ backgroundColor: TEAL }} />
+              Top quartile
+            </span>
           </div>
 
-          {/* Cohort band */}
-          <div className="mt-12 pt-10 border-t border-[#e5e5e5]">
-            <div className="text-xs text-[#999] uppercase tracking-wider mb-4">WHERE YOU SIT IN THE COHORT</div>
-            <div className="relative h-3 bg-gradient-to-r from-[#ff4444] via-[#ffaa00] via-[#ffdd00] to-[#44dd44] rounded-full">
-              <div
-                className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-5 h-5 bg-[#1a1a1a] rounded-full border-4 border-white shadow-lg"
-                style={{ left: `${benchmarkData.cohortStage}%` }}
-              />
-            </div>
-            <div className="flex justify-between mt-3 text-xs text-[#666]">
-              <span>Early Stage</span>
-              <span>Developing</span>
-              <span>Building</span>
-              <span>Thriving</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Metrics */}
-        {benchmarkData.metrics.length > 0 && (
-          <div className="bg-white rounded-2xl p-12 mb-8 shadow-sm">
-            <h2 className="text-3xl mb-2">Your Numbers vs The Cohort</h2>
-            <p className="text-sm text-[#666] mb-12">
-              Grey line = cohort median · Black line = top quartile · Colour bar = you
-            </p>
-
-            <div className="space-y-16">
-              {benchmarkData.metrics.map((metric, index) => (
-                <div key={index}>
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <div className="font-medium text-lg">{metric.name}</div>
-                      <div className="text-sm text-[#666]">{metric.description}</div>
-                    </div>
-                    {metric.status === 'below' && (
-                      <div className="flex items-center gap-2 text-[#ff4444] text-sm">
-                        <AlertTriangle className="w-4 h-4" />
-                        <span>Below median</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Label above bar */}
-                  <div className="relative h-6 mb-2">
-                    <div className="absolute -translate-x-1/2" style={{ left: `${metric.yourPosition}%` }}>
-                      <div className="text-sm font-medium whitespace-nowrap">You: {metric.yourValue}</div>
-                    </div>
+          {/* Metric rows */}
+          <div className="space-y-0 border rounded-xl overflow-hidden" style={{ borderColor: '#DDD5C8' }}>
+            {data.metrics.map((m, i) => {
+              if (m.you === null) return null;
+              const segs = getBarSegments(m.you, m.cohort_median, m.top_quartile, m.lowerIsBetter);
+              return (
+                <div key={i} className={`flex items-center gap-8 px-8 py-6 bg-white ${i > 0 ? 'border-t' : ''}`} style={{ borderColor: '#EEE8E0' }}>
+                  {/* Label */}
+                  <div className="w-56 flex-shrink-0">
+                    <div className="font-medium text-sm" style={{ color: NAVY }}>{m.label}</div>
+                    <div className="text-xs uppercase tracking-wider opacity-50 mt-0.5" style={{ color: NAVY }}>{m.sublabel}</div>
                   </div>
 
                   {/* Bar */}
-                  <div className="relative h-10 bg-[#f0f0f0] rounded-lg">
-                    <div
-                      className="h-full rounded-lg"
-                      style={{
-                        width: `${metric.yourPosition}%`,
-                        backgroundColor: metric.status === 'below' ? '#ff4444' : '#44dd44',
-                      }}
-                    />
-                    <div className="absolute top-0 bottom-0 w-0.5 bg-[#999]" style={{ left: `${metric.medianPosition}%` }} />
-                    <div className="absolute top-0 bottom-0 w-0.5 bg-[#1a1a1a]" style={{ left: `${metric.topQuartilePosition}%` }} />
-                  </div>
-
-                  {/* Labels below bar */}
-                  <div className="relative h-6 mt-2">
-                    <div className="absolute -translate-x-1/2" style={{ left: `${metric.medianPosition}%` }}>
-                      <div className="text-xs text-[#666] whitespace-nowrap">Median: {metric.cohortMedian}</div>
-                    </div>
-                    <div className="absolute -translate-x-1/2" style={{ left: `${metric.topQuartilePosition}%` }}>
-                      <div className="text-xs text-[#666] whitespace-nowrap">Top Q: {metric.topQuartile}</div>
-                    </div>
-                  </div>
-
-                  {metric.status === 'below' && (
-                    <p className="text-sm text-[#666] mt-4">
-                      Gap to median: {metric.cohortMedian}. Top brands close this in 3-6 months.
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Priority Gaps */}
-        {benchmarkData.gaps.length > 0 && (
-          <div className="bg-white rounded-2xl p-12 mb-8 shadow-sm">
-            <div className="flex justify-between items-start mb-10">
-              <div>
-                <h2 className="text-3xl mb-2">Priority Gaps : Revenue at Stake</h2>
-                <p className="text-sm text-[#666]">Ranked by annualized revenue opportunity based on your scale</p>
-              </div>
-              <div className="text-right">
-                <div className="text-xs text-[#999] mb-1">Total annual opportunity</div>
-                <div className="text-4xl">{benchmarkData.totalRevenueAtStake}</div>
-              </div>
-            </div>
-
-            <div className="space-y-8">
-              {benchmarkData.gaps.map((gap, index) => (
-                <div key={index} className="flex items-start gap-6">
-                  <div className="w-10 h-10 bg-[#1a1a1a] text-white rounded-full flex items-center justify-center flex-shrink-0 text-sm font-medium">
-                    {index + 1}
-                  </div>
                   <div className="flex-1">
-                    <div className="flex justify-between items-start mb-3">
-                      <h3 className="font-medium text-xl pr-4">{gap.title}</h3>
-                      <div className="text-right flex-shrink-0">
-                        <div className="text-xs text-[#999]">Revenue at stake</div>
-                        <div className="text-2xl">{gap.revenuePerYear}</div>
-                        <div className="text-xs text-[#666]">per year</div>
-                      </div>
+                    <div className="relative h-8 rounded-sm overflow-hidden" style={{ backgroundColor: '#EDE6DC' }}>
+                      {/* Gold: your value */}
+                      <div className="absolute inset-y-0 left-0 rounded-sm"
+                        style={{ width: `${segs.gold}%`, backgroundColor: GOLD }} />
+                      {/* Grey: gap to median (only when below) */}
+                      {segs.grey > 0 && (
+                        <div className="absolute inset-y-0"
+                          style={{ left: `${segs.gold}%`, width: `${segs.grey}%`, backgroundColor: '#B0A898' }} />
+                      )}
+                      {/* Teal: top quartile band */}
+                      {segs.tealWidth > 0 && (
+                        <div className="absolute inset-y-0"
+                          style={{ left: `${segs.tealStart + segs.grey}%`, width: `${segs.tealWidth}%`, backgroundColor: TEAL, opacity: 0.7 }} />
+                      )}
                     </div>
 
-                    <div className="flex items-center gap-3 mb-4">
-                      <span className="inline-block px-3 py-1 bg-[#fff9e6] text-[#b8860b] text-xs rounded-md">
-                        {gap.effort}
-                      </span>
-                      <span className="text-sm text-[#666]">⏱ {gap.timeline}</span>
-                    </div>
-
-                    <p className="text-[#666] mb-4">{gap.description}</p>
-
-                    <div className="bg-[#f0f8ff] border-l-4 border-[#4285f4] pl-5 py-3 rounded-r">
-                      <div className="flex items-start gap-3">
-                        <Zap className="w-5 h-5 text-[#4285f4] flex-shrink-0 mt-0.5" />
-                        <div>
-                          <div className="text-xs text-[#4285f4] font-medium uppercase tracking-wider mb-1">
-                            Recommended action
-                          </div>
-                          <p className="text-sm text-[#666]">{gap.recommendedAction}</p>
-                        </div>
-                      </div>
+                    {/* Value labels below bar */}
+                    <div className="flex justify-between mt-2 text-xs opacity-50" style={{ color: NAVY }}>
+                      <span>You: {m.you}{m.unit}</span>
+                      <span>Median: {m.cohort_median}{m.unit}</span>
+                      <span>Top Q: {m.top_quartile}{m.unit}</span>
                     </div>
                   </div>
+
+                  {/* Status */}
+                  <div className="w-28 text-right flex-shrink-0">
+                    <StatusLabel isTop={segs.isTop} isAbove={segs.isAbove} />
+                  </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* About This Benchmark */}
-        <div className="bg-white rounded-2xl p-12 mb-8 shadow-sm">
-          <h3 className="text-2xl mb-8">About This Benchmark</h3>
-          <div className="grid grid-cols-3 gap-10">
-            <div>
-              <div className="text-xs text-[#999] uppercase tracking-wider mb-2">COHORT SIZE</div>
-              <div className="font-medium text-lg mb-2">{benchmarkData.cohortSize} D2C brands</div>
-              <div className="text-sm text-[#666]">{benchmarkData.cohortDescription}</div>
-            </div>
-            <div>
-              <div className="text-xs text-[#999] uppercase tracking-wider mb-2">DATA WINDOW</div>
-              <div className="font-medium text-lg mb-2">{benchmarkData.dataWindow}</div>
-              <div className="text-sm text-[#666]">{benchmarkData.dataWindowDescription}</div>
-            </div>
-            <div>
-              <div className="text-xs text-[#999] uppercase tracking-wider mb-2">SOURCE</div>
-              <div className="font-medium text-lg mb-2">{benchmarkData.source}</div>
-              <div className="text-sm text-[#666]">{benchmarkData.sourceEdition}</div>
-            </div>
+              );
+            })}
           </div>
         </div>
+      </section>
 
-        {/* Download CTA */}
-        <div className="bg-[#1a1a1a] rounded-2xl p-10 mb-8 text-white flex justify-between items-center print:hidden">
-          <div>
-            <h3 className="text-2xl mb-2">Download the Shelf Index</h3>
-            <p className="text-sm text-[#999]">Get the full Shelf Index report as a PDF to share with your team.</p>
+      {/* ── GAPS ─────────────────────────────────────────────────────── */}
+      {data.gaps.length > 0 && (
+        <section style={{ backgroundColor: NAVY }} className="px-12 py-16 print:px-6">
+          <div className="max-w-5xl mx-auto">
+            <h2 className="text-4xl text-white font-normal mb-3">
+              {data.gaps.length === 1 ? 'One gap.' : `${['One','Two','Three'][data.gaps.length - 1] ?? data.gaps.length} gaps.`} Quantified.
+            </h2>
+            <p className="text-sm opacity-50 text-white mb-12">
+              Top quartile brands aren't smarter, they've built specific systems.
+              Here's what closing each gap is worth, modelled on your current order volume.
+            </p>
+
+            <div className="space-y-6">
+              {data.gaps.map((gap, i) => {
+                const meta = GAP_META[gap.id];
+                return (
+                  <div key={i} className="flex gap-8 border-l-2 pl-8 py-6" style={{ borderColor: GOLD }}>
+                    {/* Number + content */}
+                    <div className="flex-1">
+                      <div className="text-5xl font-light italic mb-4" style={{ color: GOLD, fontFamily: 'Georgia, serif' }}>
+                        0{i + 1}
+                      </div>
+                      <h3 className="text-xl text-white font-medium mb-3">{gap.title}</h3>
+                      <p className="text-sm leading-relaxed mb-2" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                        {gap.description}
+                      </p>
+                      <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                        {gap.additionalInfo}
+                      </p>
+                      {meta && (
+                        <p className="text-xs mt-4 font-medium" style={{ color: TEAL }}>
+                          → {meta.action}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Revenue box */}
+                    <div className="flex-shrink-0 w-44 rounded-xl p-6 text-right" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}>
+                      <div className="text-xs tracking-widest uppercase mb-3" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                        Annual Revenue<br />at Stake
+                      </div>
+                      <div className="text-3xl font-light" style={{ color: TEAL }}>{gap.revenueAtStake}</div>
+                      <div className="text-xs mt-1 uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.3)' }}>Year One</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-          <a
-            href="https://drive.google.com/uc?export=download&id=1I7geihmjOueHGG69zHNbki6u8JGydEDL"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 bg-white text-[#1a1a1a] px-8 py-4 rounded-lg hover:bg-[#f0f0f0] transition-colors flex-shrink-0"
-          >
-            <Download className="w-5 h-5" />
-            <span>Download Report</span>
-          </a>
-        </div>
+        </section>
+      )}
 
-        {/* Talk to Anphonic */}
-        <div className="bg-gradient-to-br from-[#0066ff] to-[#0052cc] rounded-2xl p-14 text-center text-white shadow-lg print:hidden">
-          <h2 className="text-4xl mb-4">Want to close these gaps faster?</h2>
-          <p className="text-lg mb-10 opacity-90">
-            Anphonic works with D2C brands to implement every gap above —<br />
-            reorder pages, loyalty, WhatsApp flows — in 4-6 weeks.
+      {/* ── CTA ──────────────────────────────────────────────────────── */}
+      <section style={{ backgroundColor: CREAM }} className="px-12 py-20 text-center print:hidden">
+        <div className="max-w-2xl mx-auto">
+          <h2 className="text-5xl font-normal leading-tight mb-4" style={{ color: NAVY }}>
+            Want us to walk you through<br />
+            your <em style={{ color: TEAL, fontStyle: 'italic' }}>full diagnostic?</em>
+          </h2>
+          <p className="text-base opacity-60 mb-10" style={{ color: NAVY }}>
+            A 20-minute call with our team. We'll show you exactly how top quartile brands
+            close each gap, and whether Anphonic's managed model fits where you are.
           </p>
-          <a
-            href="https://www.anphonic.ai/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-white text-[#0066ff] px-10 py-4 rounded-lg hover:bg-[#f0f0f0] transition-colors text-lg group"
-          >
-            <span>Talk to Anphonic</span>
-            <ArrowUpRight className="w-5 h-5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-          </a>
+
+          <div className="flex items-center justify-center gap-4 mb-8">
+            <a
+              href="https://www.anphonic.ai/"
+              target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-lg text-white font-medium hover:opacity-90 transition-opacity"
+              style={{ backgroundColor: NAVY }}
+            >
+              Book a 20-minute diagnostic →
+            </a>
+            <a
+              href="https://drive.google.com/uc?export=download&id=1I7geihmjOueHGG69zHNbki6u8JGydEDL"
+              target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-lg font-medium border hover:opacity-70 transition-opacity"
+              style={{ color: NAVY, borderColor: NAVY }}
+            >
+              Download The Shelf Index
+            </a>
+          </div>
+
+          <p className="text-xs tracking-widest opacity-40 uppercase" style={{ color: NAVY }}>
+            Your benchmark has been saved · Reference {data.refCode}
+          </p>
         </div>
-      </main>
+      </section>
+
     </div>
   );
 }
