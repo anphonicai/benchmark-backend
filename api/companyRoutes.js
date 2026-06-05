@@ -499,6 +499,16 @@ router.post('/brand-info', async (req, res) => {
     });
   }
 
+  // Email format validation
+  const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+  if (!emailRegex.test(String(email).trim())) {
+    return res.status(400).json({
+      success: false,
+      field: 'email',
+      message: 'Please enter a valid email address (e.g. rohan@yourbrand.com).',
+    });
+  }
+
   // Phone validation: Indian mobile numbers only
   // Must be 10 digits starting with 6, 7, 8, or 9
   // Accepts: 9876543210 | +91 9876543210 | 0 9876543210

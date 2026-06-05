@@ -35,7 +35,11 @@ export default function BrandInfoPage() {
 
     if (!formData.role) e.role = "Please select your role.";
 
-    if (!formData.email.trim()) e.email = "Work email is required.";
+    if (!formData.email.trim()) {
+      e.email = "Work email is required.";
+    } else if (!/^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(formData.email.trim())) {
+      e.email = "Please enter a valid email address (e.g. rohan@yourbrand.com).";
+    }
 
     // Phone: required check only — format validation happens on the backend
     if (!formData.phone.trim()) {
