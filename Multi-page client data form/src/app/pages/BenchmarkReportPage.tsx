@@ -335,7 +335,6 @@ export default function BenchmarkReportPage() {
               <div className="mb-8">
                 <div className="text-xs text-[#999] uppercase tracking-wider mb-2">COHORT PERCENTILE</div>
                 <div className="text-6xl mb-2">{benchmarkData.percentile}</div>
-                <div className="text-sm text-[#666]">{benchmarkData.percentileText}</div>
               </div>
               <div>
                 <div className="text-xs text-[#999] uppercase tracking-wider mb-3">VERDICT</div>
