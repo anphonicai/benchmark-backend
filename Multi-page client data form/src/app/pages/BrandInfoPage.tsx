@@ -41,20 +41,38 @@ export default function BrandInfoPage() {
       e.email = "Please enter a valid email address (e.g. rohan@yourbrand.com).";
     }
 
-    // Phone: required check only — format validation happens on the backend
-    if (!formData.phone.trim()) {
+    // Phone: 10 digits starting with 6-9, no repeating patterns
+    const phoneDigits = formData.phone.replace(/\D/g, "");
+    if (!phoneDigits) {
       e.phone = "Phone number is required.";
+    } else if (!/^[6-9]\d{9}$/.test(phoneDigits)) {
+      e.phone = "Enter a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9.";
+    } else if (/^(\d)\1{9}$/.test(phoneDigits)) {
+      e.phone = "Please enter a real mobile number.";
+    } else if (/(\d)\1{5}/.test(phoneDigits)) {
+      e.phone = "Please enter a real mobile number.";
     }
 
-    if (!formData.brandName.trim()) e.brandName = "Brand name is required.";
+    // Brand name: must contain letters, 2–100 chars
+    if (!formData.brandName.trim()) {
+      e.brandName = "Brand name is required.";
+    } else if (formData.brandName.trim().length < 2) {
+      e.brandName = "Brand name must be at least 2 characters.";
+    } else if (formData.brandName.trim().length > 100) {
+      e.brandName = "Brand name is too long (max 100 characters).";
+    } else if (!/[a-zA-Z]/.test(formData.brandName.trim())) {
+      e.brandName = "Brand name must contain at least some letters.";
+    }
 
-    // Shopify URL: must start with https:// or www.
+    // Shopify URL: valid domain format, letters in domain, max 200 chars
     const shopifyTrimmed = formData.shopifyUrl.trim();
-    const validShopify = /^(https?:\/\/|www\.)\S+\.\S+/.test(shopifyTrimmed);
+    const domainRegex = /^(https?:\/\/)(www\.)?[a-zA-Z][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]?\.[a-zA-Z]{2,}(\/[^\s]{0,100})?$/;
     if (!shopifyTrimmed) {
       e.shopifyUrl = "Shopify store URL is required.";
-    } else if (!validShopify) {
-      e.shopifyUrl = "Please enter a valid URL starting with https:// or www. (e.g. https://yourbrand.com)";
+    } else if (shopifyTrimmed.length > 200) {
+      e.shopifyUrl = "URL is too long. Please enter your store's main domain (e.g. https://yourbrand.com).";
+    } else if (!domainRegex.test(shopifyTrimmed)) {
+      e.shopifyUrl = "Please enter a valid store URL (e.g. https://yourbrand.com).";
     }
 
     if (!formData.category) e.category = "Please select a category.";

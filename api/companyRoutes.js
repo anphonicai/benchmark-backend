@@ -510,20 +510,44 @@ router.post('/brand-info', async (req, res) => {
   }
 
   // Phone validation: Indian mobile numbers only
-  // Must be 10 digits starting with 6, 7, 8, or 9
-  // Accepts: 9876543210 | +91 9876543210 | 0 9876543210
   if (phone) {
     const digits = String(phone).replace(/\D/g, '');
     let core = digits;
     if (digits.length === 12 && digits.startsWith('91')) core = digits.slice(2);
     if (digits.length === 11 && digits.startsWith('0')) core = digits.slice(1);
 
-    const validIndianMobile = core.length === 10 && /^[6-9]\d{9}$/.test(core);
-    if (!validIndianMobile) {
+    const validFormat = core.length === 10 && /^[6-9]\d{9}$/.test(core);
+    const allSameDigit = /^(\d)\1{9}$/.test(core);
+    const tooManyRepeating = /(\d)\1{5}/.test(core);
+
+    if (!validFormat || allSameDigit || tooManyRepeating) {
       return res.status(400).json({
         success: false,
         field: 'phone',
         message: 'Please enter a valid Indian mobile number.',
+      });
+    }
+  }
+
+  // Brand name: must contain letters, 2–100 chars
+  if (brandName) {
+    if (brandName.trim().length < 2 || brandName.trim().length > 100 || !/[a-zA-Z]/.test(brandName)) {
+      return res.status(400).json({
+        success: false,
+        field: 'brandName',
+        message: 'Brand name must be 2–100 characters and contain at least some letters.',
+      });
+    }
+  }
+
+  // Shopify URL: valid domain, max 200 chars
+  if (shopifyUrl) {
+    const domainRegex = /^(https?:\/\/)(www\.)?[a-zA-Z][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]?\.[a-zA-Z]{2,}(\/[^\s]{0,100})?$/;
+    if (shopifyUrl.length > 200 || !domainRegex.test(shopifyUrl.trim())) {
+      return res.status(400).json({
+        success: false,
+        field: 'shopifyUrl',
+        message: 'Please enter a valid store URL (e.g. https://yourbrand.com).',
       });
     }
   }
