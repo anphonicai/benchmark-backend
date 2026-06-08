@@ -24,6 +24,54 @@ export default function BrandInfoPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [shopifyVerify, setShopifyVerify] = useState('idle' as 'idle' | 'checking' | 'valid' | 'invalid');
   const [shopifyVerifyMsg, setShopifyVerifyMsg] = useState('');
+  const [emailVerify, setEmailVerify] = useState('idle' as 'idle' | 'sending' | 'sent' | 'verifying' | 'verified');
+  const [emailVerifyMsg, setEmailVerifyMsg] = useState('');
+  const [otpCode, setOtpCode] = useState('');
+
+  const sendEmailOtp = async (email: string) => {
+    setEmailVerify('sending');
+    setEmailVerifyMsg('');
+    try {
+      const res = await fetch('/api/companies/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setEmailVerify('sent');
+      } else {
+        setEmailVerify('idle');
+        setEmailVerifyMsg(data.message || 'Failed to send code.');
+      }
+    } catch {
+      setEmailVerify('idle');
+      setEmailVerifyMsg('Could not send code. Check your connection.');
+    }
+  };
+
+  const checkOtp = async (email: string, code: string) => {
+    setEmailVerify('verifying');
+    try {
+      const res = await fetch('/api/companies/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setEmailVerify('verified');
+        setEmailVerifyMsg('');
+        setErrors((prev: Record<string, string>) => ({ ...prev, email: '' }));
+      } else {
+        setEmailVerify('sent');
+        setEmailVerifyMsg(data.message || 'Incorrect code.');
+      }
+    } catch {
+      setEmailVerify('sent');
+      setEmailVerifyMsg('Could not verify. Try again.');
+    }
+  };
 
   const verifyShopifyUrl = async (url: string) => {
     setShopifyVerify('checking');
@@ -61,6 +109,12 @@ export default function BrandInfoPage() {
       e.email = "Work email is required.";
     } else if (!/^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(formData.email.trim())) {
       e.email = "Please enter a valid email address (e.g. rohan@yourbrand.com).";
+    } else if (emailVerify !== 'verified') {
+      e.email = emailVerify === 'sending' || emailVerify === 'verifying'
+        ? "Please wait…"
+        : emailVerify === 'sent'
+          ? "Please enter the 6-digit code sent to your email."
+          : "Please verify your email to continue.";
     }
 
     // Phone: India or UAE, strip country code then validate core
@@ -129,6 +183,14 @@ export default function BrandInfoPage() {
   };
 
   const handleBlur = (field: string) => {
+    if (field === 'email') {
+      const trimmed = formData.email.trim();
+      const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+      if (trimmed && emailRegex.test(trimmed) && emailVerify === 'idle') {
+        sendEmailOtp(trimmed);
+        return;
+      }
+    }
     if (field === 'shopifyUrl') {
       const trimmed = formData.shopifyUrl.trim();
       const domainRegex = /^https:\/\/(([a-zA-Z0-9][a-zA-Z0-9\-]*\.)+[a-zA-Z]{2,})(\/[^\s]{0,200})?$/;
@@ -245,15 +307,68 @@ export default function BrandInfoPage() {
               <label className="block text-sm text-[#666] mb-2">
                 WORK EMAIL <span className="text-red-500">*</span>
               </label>
-              <input
-                type="email"
-                placeholder="rohan@yourbrand.com"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                onBlur={() => handleBlur("email")}
-                className={inputClass(errors.email)}
-              />
-              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+              <div className="relative">
+                <input
+                  type="email"
+                  placeholder="rohan@yourbrand.com"
+                  value={formData.email}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    setFormData((prev: typeof formData) => ({ ...prev, email: e.target.value }));
+                    setEmailVerify('idle');
+                    setOtpCode('');
+                    setEmailVerifyMsg('');
+                  }}
+                  onBlur={() => handleBlur("email")}
+                  className={inputClass(errors.email) + " pr-10"}
+                />
+                {emailVerify === 'sending' && (
+                  <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#999] animate-spin" />
+                )}
+                {emailVerify === 'verified' && (
+                  <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-500" />
+                )}
+              </div>
+              {emailVerify === 'sending' && (
+                <p className="text-xs text-[#999] mt-1">Sending verification code…</p>
+              )}
+              {emailVerify === 'verified' && (
+                <p className="text-xs text-green-600 mt-1">Email verified.</p>
+              )}
+              {(emailVerify === 'sent' || emailVerify === 'verifying') && (
+                <div className="mt-2">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={6}
+                    placeholder="Enter 6-digit code"
+                    value={otpCode}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      const val = e.target.value.replace(/\D/g, "").slice(0, 6);
+                      setOtpCode(val);
+                      if (val.length === 6) checkOtp(formData.email.trim(), val);
+                    }}
+                    className={`w-full px-4 py-3 bg-white border rounded-lg focus:outline-none transition-colors text-center tracking-[0.4em] text-lg font-semibold ${
+                      emailVerifyMsg ? "border-red-400" : "border-[#d4d4d4] focus:border-[#1a1a1a]"
+                    }`}
+                  />
+                  {emailVerify === 'verifying' && (
+                    <p className="text-xs text-[#999] mt-1">Verifying…</p>
+                  )}
+                  {emailVerifyMsg && (
+                    <p className="text-red-500 text-xs mt-1">{emailVerifyMsg}</p>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => { setOtpCode(''); setEmailVerifyMsg(''); sendEmailOtp(formData.email.trim()); }}
+                    className="text-xs text-[#666] underline mt-1"
+                  >
+                    Resend code
+                  </button>
+                </div>
+              )}
+              {errors.email && emailVerify !== 'verified' && (
+                <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm text-[#666] mb-2">

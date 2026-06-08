@@ -2,6 +2,7 @@ const express = require('express');
 const pool = require('../db/connection');
 const { computeShelfScore, computePercentile, computeVerdict, scoreBrand } = require('./scoring');
 const { fetchShopifyMetrics, fetchShopifyQL } = require('./shopify');
+const { sendOtp, verifyOtp } = require('./otp');
 
 const router = express.Router();
 
@@ -497,10 +498,15 @@ router.post('/brand-info', async (req, res) => {
   } = req.body;
 
   // Validate required fields
-  if (!email || !brandName) {
+  const missing = [];
+  if (!email) missing.push('email');
+  if (!brandName) missing.push('brandName');
+  if (!phone) missing.push('phone');
+  if (missing.length) {
     return res.status(400).json({
       success: false,
-      message: 'Missing required fields: email and brandName are required',
+      message: `Missing required fields: ${missing.join(', ')}`,
+      fields: missing,
     });
   }
 
@@ -621,6 +627,35 @@ router.post('/brand-info', async (req, res) => {
       message: error.message,
     });
   }
+});
+
+// POST /api/companies/send-otp
+router.post('/send-otp', async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ success: false, message: 'Email is required.' });
+
+  const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+  if (!emailRegex.test(String(email).trim())) {
+    return res.status(400).json({ success: false, message: 'Invalid email address.' });
+  }
+
+  try {
+    await sendOtp(email.trim().toLowerCase());
+    return res.status(200).json({ success: true, message: 'Code sent.' });
+  } catch (error) {
+    console.error('OTP send error:', error.message);
+    return res.status(500).json({ success: false, message: 'Failed to send code. Please try again.' });
+  }
+});
+
+// POST /api/companies/verify-otp
+router.post('/verify-otp', (req, res) => {
+  const { email, code } = req.body;
+  if (!email || !code) return res.status(400).json({ success: false, message: 'Email and code are required.' });
+
+  const result = verifyOtp(email.trim().toLowerCase(), code);
+  if (!result.valid) return res.status(400).json({ success: false, message: result.reason });
+  return res.status(200).json({ success: true });
 });
 
 // GET /api/companies/validate-shopify-url?url=https://yourbrand.com
