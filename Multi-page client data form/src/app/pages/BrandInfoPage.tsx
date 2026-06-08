@@ -347,9 +347,7 @@ export default function BrandInfoPage() {
                       setOtpCode(val);
                       if (val.length === 6) checkOtp(formData.email.trim(), val);
                     }}
-                    className={`w-full px-4 py-3 bg-white border rounded-lg focus:outline-none transition-colors text-center tracking-[0.4em] text-lg font-semibold ${
-                      emailVerifyMsg ? "border-red-400" : "border-[#d4d4d4] focus:border-[#1a1a1a]"
-                    }`}
+                    className={inputClass(emailVerifyMsg)}
                   />
                   {emailVerify === 'verifying' && (
                     <p className="text-xs text-[#999] mt-1">Verifying…</p>
