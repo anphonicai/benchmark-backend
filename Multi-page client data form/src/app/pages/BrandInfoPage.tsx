@@ -384,7 +384,6 @@ export default function BrandInfoPage() {
                 onBlur={() => handleBlur("phone")}
                 className={inputClass(errors.phone)}
               />
-              <p className="text-xs text-[#999] mt-1">India or UAE numbers accepted</p>
               {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
             </div>
           </div>
