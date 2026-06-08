@@ -260,12 +260,13 @@ export default function BrandInfoPage() {
                 PHONE <span className="text-red-500">*</span>
               </label>
               <input
-                type="tel"
+                type="text"
+                inputMode="tel"
                 placeholder="9876543210 or +971 501234567"
                 value={formData.phone}
                 onChange={(e) => {
                   const val = e.target.value.replace(/[^\d+\s\-]/g, "").slice(0, 16);
-                  setFormData({ ...formData, phone: val });
+                  setFormData((prev) => ({ ...prev, phone: val }));
                 }}
                 onBlur={() => handleBlur("phone")}
                 className={inputClass(errors.phone)}
