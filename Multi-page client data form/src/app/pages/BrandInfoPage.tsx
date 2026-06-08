@@ -438,9 +438,7 @@ export default function BrandInfoPage() {
             {shopifyVerify === 'valid' && (
               <p className="text-xs text-green-600 mt-1">Shopify store verified.</p>
             )}
-            {shopifyVerify !== 'checking' && shopifyVerify !== 'valid' && (
-              <p className="text-sm text-[#999] mt-2">Must start with https:// — e.g. https://yourbrand.com</p>
-            )}
+
             {errors.shopifyUrl && <p className="text-red-500 text-xs mt-1">{errors.shopifyUrl}</p>}
           </div>
 
