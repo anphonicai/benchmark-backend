@@ -14,6 +14,7 @@ const SUGGESTED_QUESTIONS = [
 
 export default function Chatbot() {
   const [open, setOpen] = useState(false);
+  const [showPopup, setShowPopup] = useState(true);
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
@@ -28,6 +29,11 @@ export default function Chatbot() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, open]);
+
+  useEffect(() => {
+    const t = setTimeout(() => setShowPopup(false), 6000);
+    return () => clearTimeout(t);
+  }, []);
 
   const sendMessage = async (text: string) => {
     const trimmed = text.trim();
@@ -56,9 +62,23 @@ export default function Chatbot() {
 
   return (
     <>
+      {/* Popup tooltip */}
+      {showPopup && !open && (
+        <div className="fixed bottom-24 right-6 z-50 bg-white border border-[#e5e5e5] rounded-2xl rounded-br-sm shadow-lg px-4 py-3 max-w-[200px] animate-bounce-once">
+          <button
+            onClick={() => setShowPopup(false)}
+            className="absolute -top-2 -right-2 w-5 h-5 bg-[#999] text-white rounded-full text-xs flex items-center justify-center hover:bg-[#666]"
+          >
+            ×
+          </button>
+          <p className="text-sm text-[#1a1a1a] font-medium">Hi! 👋</p>
+          <p className="text-xs text-[#666] mt-0.5">How may I help you?</p>
+        </div>
+      )}
+
       {/* Floating button */}
       <button
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => { setOpen((v) => !v); setShowPopup(false); }}
         className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-[#0066ff] text-white rounded-full shadow-lg flex items-center justify-center hover:bg-[#0052cc] transition-colors"
         aria-label="Open chat assistant"
       >
