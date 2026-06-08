@@ -15,7 +15,7 @@ const sendOtp = async (email) => {
   otpStore.set(email.toLowerCase(), { code, expiresAt: Date.now() + OTP_TTL_MS });
 
   await resend.emails.send({
-    from: 'Anphonic <onboarding@resend.dev>',
+    from: 'Anphonic <noreply@anphonic.ai>',
     to: email,
     subject: 'Your Anphonic verification code',
     html: `
