@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { ArrowLeft } from "lucide-react";
 import Logo from "../components/Logo";
+import Chatbot from "../components/Chatbot";
 
 export default function ManualDataEntryPage() {
   const navigate = useNavigate();
@@ -76,6 +77,7 @@ export default function ManualDataEntryPage() {
 
   return (
     <div className="min-h-screen bg-[#f8f6f3]">
+      <Chatbot />
       <header className="px-4 py-4 md:px-12 md:py-6">
         <Logo />
       </header>

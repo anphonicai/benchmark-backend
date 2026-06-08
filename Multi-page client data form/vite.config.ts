@@ -34,6 +34,12 @@ export default defineConfig({
   // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
   assetsInclude: ['**/*.svg', '**/*.csv'],
 
+  server: {
+    proxy: {
+      '/api': 'http://localhost:3000',
+    },
+  },
+
   build: {
     // Output to backend root's client/ folder so Express can serve it directly
     outDir: '../client',

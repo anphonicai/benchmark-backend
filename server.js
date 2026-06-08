@@ -6,6 +6,7 @@ const path = require('path');
 const pool = require('./db/connection');
 const { fetchShopifyMetrics } = require('./api/shopify');
 const { scoreBrand } = require('./api/scoring');
+const fetch = (...args) => import('node-fetch').then(({ default: f }) => f(...args));
 
 dotenv.config();
 
@@ -192,6 +193,60 @@ app.get('/report', async (req, res) => {
   } catch (error) {
     console.error('Error generating report:', error.message);
     return res.status(500).json({ error: 'Failed to generate report', details: error.message });
+  }
+});
+
+// POST /api/chat — Groq-powered AI chatbot for the benchmark form
+app.post('/api/chat', async (req, res) => {
+  const { messages } = req.body;
+  if (!Array.isArray(messages)) {
+    return res.status(400).json({ error: 'messages must be an array' });
+  }
+
+  const systemPrompt = `You are a helpful assistant embedded in Anphonic's D2C benchmark tool for Indian brands.
+Your job is to help brand owners fill out the manual benchmark form and understand their metrics.
+For any contact or support questions, always share: merchants@anphonic.ai
+
+The form collects:
+- Category: type of D2C brand (Food & Beverage, Wellness & Supplements, etc.)
+- Average Order Value (AOV): average INR value per order
+- Orders per month: estimated monthly order volume
+- Add to cart rate (%): % of product page visitors who add to cart (typical D2C range: 5–15%)
+- Repeat revenue share (%): % of total revenue from repeat customers (healthy D2C: 25–45%)
+- Time to 2nd order (days): median days between a customer's 1st and 2nd purchase (healthy: 30–60 days)
+- Loyalty: loyalty program tool used (Nector, Pop Coin, etc.)
+- Post-purchase upsell: whether the brand does post-purchase upsells
+- WhatsApp tool: WhatsApp marketing tool used
+
+Be concise and helpful. Explain metrics simply. If someone doesn't know a value, suggest they use a rough estimate.
+Keep answers under 80 words. Don't use bullet points unless listing 3+ items.`;
+
+  try {
+    const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: 'llama-3.1-8b-instant',
+        messages: [{ role: 'system', content: systemPrompt }, ...messages],
+        max_tokens: 200,
+        temperature: 0.7,
+      }),
+    });
+
+    if (!groqRes.ok) {
+      const err = await groqRes.text();
+      console.error('Groq API error:', err);
+      return res.status(502).json({ error: 'AI service unavailable' });
+    }
+
+    const data = await groqRes.json();
+    res.json({ reply: data.choices[0].message.content });
+  } catch (error) {
+    console.error('Chat error:', error.message);
+    res.status(500).json({ error: 'Failed to get AI response' });
   }
 });
 
