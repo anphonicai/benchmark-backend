@@ -17,14 +17,23 @@ const PORT = process.env.PORT || 3000;
 const companyRoutes = require('./api/companyRoutes');
 
 // Middleware to parse JSON and URL-encoded data from requests
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json({ limit: '50kb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '50kb' }));
 
 // Utility functions
 const isEmpty = (value) => value === undefined || value === null || value === '';
 const parseNumber = (value, fallback = 0) => {
   const number = Number(value);
   return Number.isFinite(number) ? number : fallback;
+};
+
+// Middleware: only allow requests that carry the correct admin API key
+const requireAdminKey = (req, res, next) => {
+  const key = req.headers['x-admin-key'];
+  if (!key || key !== process.env.ADMIN_API_KEY) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  next();
 };
 
 // Health check endpoint
@@ -119,7 +128,7 @@ app.post('/manual', (req, res) => {
 });
 
 // Get /metrics
-app.get('/metrics', async (req, res) => {
+app.get('/metrics', requireAdminKey, async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT
@@ -160,7 +169,7 @@ app.get('/metrics', async (req, res) => {
 });
 
 // GET /report
-app.get('/report', async (req, res) => {
+app.get('/report', requireAdminKey, async (req, res) => {
   try {
     // High-level performance summary
     const summaryResult = await pool.query(`

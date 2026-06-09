@@ -25,6 +25,15 @@ const otpLimiter = rateLimit({
   message: { success: false, message: 'Too many OTP requests. Please wait before requesting another code.' },
 });
 
+// 10 verification attempts per IP per 15 minutes — prevents brute-forcing a 6-digit code
+const otpVerifyLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many verification attempts. Please request a new code.' },
+});
+
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
 const SHOPIFY_HEADERS = ['x-shopid', 'x-shopify-stage', 'x-shardid', 'x-sorting-hat-podid', 'shopify-complexity-score'];
@@ -490,8 +499,16 @@ router.get('/benchmark/:companyId', async (req, res) => {
   }
 });
 
+const requireAdminKey = (req, res, next) => {
+  const key = req.headers['x-admin-key'];
+  if (!key || key !== process.env.ADMIN_API_KEY) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  next();
+};
+
 // GET /api/companies/metrics
-router.get('/metrics', async (req, res) => {
+router.get('/metrics', requireAdminKey, async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM metrics');
     res.status(200).json({ success: true, data: result.rows });
@@ -668,7 +685,7 @@ router.post('/send-otp', otpLimiter, async (req, res) => {
 });
 
 // POST /api/companies/verify-otp
-router.post('/verify-otp', (req, res) => {
+router.post('/verify-otp', otpVerifyLimiter, (req, res) => {
   const { email, code } = req.body;
   if (!email || !code) return res.status(400).json({ success: false, message: 'Email and code are required.' });
 
