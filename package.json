@@ -30,6 +30,7 @@
     "body-parser": "^2.2.2",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.5.2",
     "node-fetch": "^3.3.2",
     "pg": "^8.21.0",
     "resend": "^6.12.4"

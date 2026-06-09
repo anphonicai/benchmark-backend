@@ -1,10 +1,29 @@
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const pool = require('../db/connection');
 const { computeShelfScore, computePercentile, computeVerdict, scoreBrand } = require('./scoring');
 const { fetchShopifyMetrics, fetchShopifyQL } = require('./shopify');
 const { sendOtp, verifyOtp } = require('./otp');
 
 const router = express.Router();
+
+// 5 submissions per IP per 15 minutes for write endpoints
+const submissionLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many submissions. Please wait 15 minutes before trying again.' },
+});
+
+// 10 OTP requests per IP per hour
+const otpLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many OTP requests. Please wait before requesting another code.' },
+});
 
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
@@ -274,7 +293,7 @@ router.post('/shopifyql', async (req, res) => {
 });
 
 // POST /api/companies/benchmark/manual
-router.post('/benchmark/manual', async (req, res) => {
+router.post('/benchmark/manual', submissionLimiter, async (req, res) => {
   console.log('manual benchmark route hit');
   
   const {
@@ -483,7 +502,7 @@ router.get('/metrics', async (req, res) => {
 });
 
 // POST /api/companies/brand-info - Store brand info from step 01 (BrandInfoPage)
-router.post('/brand-info', async (req, res) => {
+router.post('/brand-info', submissionLimiter, async (req, res) => {
   console.log('POST /api/companies/brand-info hit');
   
   const {
@@ -630,7 +649,7 @@ router.post('/brand-info', async (req, res) => {
 });
 
 // POST /api/companies/send-otp
-router.post('/send-otp', async (req, res) => {
+router.post('/send-otp', otpLimiter, async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ success: false, message: 'Email is required.' });
 

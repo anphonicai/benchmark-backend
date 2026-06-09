@@ -209,7 +209,7 @@ export default function BenchmarkReportPage() {
       <section style={{ backgroundColor: NAVY }} className="px-4 py-6 md:px-12 md:py-10 print:px-6">
         {/* Nav */}
         <div className="flex items-center justify-between mb-10 md:mb-16 print:hidden">
-          <Logo />
+          <Logo variant="dark" />
           <a
             href="https://drive.google.com/uc?export=download&id=1I7geihmjOueHGG69zHNbki6u8JGydEDL"
             target="_blank" rel="noopener noreferrer"
