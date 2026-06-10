@@ -117,7 +117,7 @@ export default function BrandInfoPage() {
           : "Please verify your email to continue.";
     }
 
-    // Phone: India or UAE, strip country code then validate core
+    // Phone: India only
     const phoneDigits = formData.phone.replace(/\D/g, "");
     let phoneCore = phoneDigits;
     let phoneCountry = "";
@@ -129,23 +129,15 @@ export default function BrandInfoPage() {
       phoneCore = phoneDigits.slice(1); phoneCountry = "IN";
     } else if (phoneDigits.length === 10 && /^[6-9]/.test(phoneDigits)) {
       phoneCore = phoneDigits; phoneCountry = "IN";
-    // UAE: +971XXXXXXXXX (12), 0XXXXXXXXX (10 with leading 0), XXXXXXXXX (9)
-    } else if (phoneDigits.length === 12 && phoneDigits.startsWith("971") && phoneDigits[3] === "5") {
-      phoneCore = phoneDigits.slice(3); phoneCountry = "AE";
-    } else if (phoneDigits.length === 10 && phoneDigits.startsWith("05")) {
-      phoneCore = phoneDigits.slice(1); phoneCountry = "AE";
-    } else if (phoneDigits.length === 9 && phoneDigits.startsWith("5")) {
-      phoneCore = phoneDigits; phoneCountry = "AE";
     }
 
     const indiaValid = phoneCountry === "IN" && /^[6-9]\d{9}$/.test(phoneCore);
-    const uaeValid   = phoneCountry === "AE" && /^5\d{8}$/.test(phoneCore);
     const notFake    = !/(\d)\1{3}/.test(phoneCore) && new Set(phoneCore.split("")).size >= 4;
 
     if (!phoneDigits) {
       e.phone = "Phone number is required.";
-    } else if (!indiaValid && !uaeValid) {
-      e.phone = "Enter a valid Indian (10-digit) or UAE (+971 / 05X) mobile number.";
+    } else if (!indiaValid) {
+      e.phone = "Enter a valid Indian mobile number (10 digits).";
     } else if (!notFake) {
       e.phone = "Please enter a real mobile number.";
     }
@@ -375,7 +367,7 @@ export default function BrandInfoPage() {
               <input
                 type="text"
                 inputMode="tel"
-                placeholder="9876543210 or +971 501234567"
+                placeholder="9876543210"
                 value={formData.phone}
                 onChange={(e) => {
                   const val = e.target.value.replace(/[^\d+\s\-]/g, "").slice(0, 16);
