@@ -170,12 +170,7 @@ function VerdictHeadline({ text }: { text: string }) {
   );
 }
 
-// ── Calendar slots ────────────────────────────────────────────────────────
-const CALENDAR_SLOTS = [
-  { label: 'Book a session · Option A', url: 'https://calendar.app.google/nwch6oMUqo9gHTnK9' },
-  { label: 'Book a session · Option B', url: 'https://calendar.app.google/eBoyKNzeUxUvhmUU8' },
-  { label: 'Book a session · Option C', url: 'https://calendar.app.google/2XQVSd57xK9B49Y68' },
-];
+const CALENDAR_URL = 'https://calendar.app.google/2XQVSd57xK9B49Y68';
 
 // ── Calendar Modal ────────────────────────────────────────────────────────
 function CalendarModal({ onClose, teal, navy }: { onClose: () => void; teal: string; navy: string }) {
@@ -210,40 +205,34 @@ function CalendarModal({ onClose, teal, navy }: { onClose: () => void; teal: str
         </div>
         {/* Body */}
         <div className="px-8 py-6 bg-white">
-          <p className="text-xs mb-4" style={{ color: '#888' }}>
-            Pick any slot — all open Google Calendar booking.
-          </p>
-          {CALENDAR_SLOTS.map((slot, i) => (
-            <a
-              key={i}
-              href={slot.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-between rounded-xl px-5 py-4 mb-3 last:mb-0 transition-colors group"
-              style={{ background: '#fafaf8', border: '0.5px solid #e2e2e0' }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLAnchorElement).style.borderColor = teal;
-                (e.currentTarget as HTMLAnchorElement).style.background = '#e1f5ee';
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLAnchorElement).style.borderColor = '#e2e2e0';
-                (e.currentTarget as HTMLAnchorElement).style.background = '#fafaf8';
-              }}
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: '#e1f5ee' }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={teal} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-                  </svg>
-                </div>
-                <div>
-                  <div className="text-sm font-medium" style={{ color: navy }}>{slot.label}</div>
-                  <div className="text-xs" style={{ color: '#888' }}>Opens Google Calendar · 20 min</div>
-                </div>
+          <a
+            href={CALENDAR_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-between rounded-xl px-5 py-4 transition-colors"
+            style={{ background: '#fafaf8', border: '0.5px solid #e2e2e0' }}
+            onMouseEnter={e => {
+              (e.currentTarget as HTMLAnchorElement).style.borderColor = teal;
+              (e.currentTarget as HTMLAnchorElement).style.background = '#e1f5ee';
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget as HTMLAnchorElement).style.borderColor = '#e2e2e0';
+              (e.currentTarget as HTMLAnchorElement).style.background = '#fafaf8';
+            }}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: '#e1f5ee' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={teal} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
               </div>
-              <span style={{ color: teal, fontSize: 16 }}>→</span>
-            </a>
-          ))}
+              <div>
+                <div className="text-sm font-medium" style={{ color: navy }}>Book a session</div>
+                <div className="text-xs" style={{ color: '#888' }}>Opens Google Calendar · 20 min</div>
+              </div>
+            </div>
+            <span style={{ color: teal, fontSize: 16 }}>→</span>
+          </a>
         </div>
       </div>
       <style>{`@keyframes modalPop { from { transform: scale(0.93); opacity: 0; } to { transform: scale(1); opacity: 1; } }`}</style>
