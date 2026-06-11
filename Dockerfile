@@ -9,6 +9,7 @@ RUN npm ci --legacy-peer-deps
 
 # Copy source and build (outDir is ../client per vite.config.ts)
 COPY ["Multi-page client data form/src/", "./src/"]
+COPY ["Multi-page client data form/public/", "./public/"]
 COPY ["Multi-page client data form/index.html", \
       "Multi-page client data form/vite.config.ts", \
       "Multi-page client data form/postcss.config.mjs", \
