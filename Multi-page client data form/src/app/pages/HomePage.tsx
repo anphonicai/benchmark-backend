@@ -150,7 +150,7 @@ export default function HomePage() {
         {[...Array(6)].map((_, i) => (
           <div
             key={i}
-            className="particle absolute rounded-full bg-[#10b981]"
+            className="particle absolute rounded-full bg-[#14b8a6]"
             style={{
               opacity: 0.04,
               width: `${90 + i * 35}px`,
@@ -177,9 +177,9 @@ export default function HomePage() {
           </a>
           <Link
             to="/methodology"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#EBF8F7] border border-[#B8E0E0] rounded-full text-xs font-semibold text-[#1C9393] tracking-wide hover:bg-[#D4EFEF] transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#e6faf9] border border-[#a8dbd8] rounded-full text-xs font-semibold text-[#14b8a6] tracking-wide hover:bg-[#c8ecea] transition-colors"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-[#30B4B7]" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#14b8a6]" />
             HOW WE BENCHMARK
           </Link>
         </div>
@@ -211,22 +211,22 @@ export default function HomePage() {
             >
               <span className="block overflow-hidden">
                 {["Where", "does", "your"].map((w) => (
-                  <span key={w} className="word inline-block mr-[0.22em] text-[#0D0D0D]">{w}</span>
+                  <span key={w} className="word inline-block mr-[0.22em] text-[#0a1f3d]">{w}</span>
                 ))}
               </span>
               <span className="block overflow-hidden">
                 {["D2C", "brand"].map((w) => (
-                  <span key={w} className="word inline-block mr-[0.22em] text-[#0D0D0D]">{w}</span>
+                  <span key={w} className="word inline-block mr-[0.22em] text-[#0a1f3d]">{w}</span>
                 ))}
                 <em
-                  className="word inline-block mr-[0.22em] text-[#10b981] not-italic"
+                  className="word inline-block mr-[0.22em] text-[#14b8a6] not-italic"
                   style={{ fontStyle: "italic" }}
                 >
                   actually
                 </em>
               </span>
               <span className="block overflow-hidden">
-                <span className="word inline-block text-[#0D0D0D]">stand?</span>
+                <span className="word inline-block text-[#0a1f3d]">stand?</span>
               </span>
             </h1>
 
@@ -241,14 +241,14 @@ export default function HomePage() {
               <div className="flex flex-wrap gap-3">
                 <button
                   onClick={() => navigate("/brand-info")}
-                  className="group bg-[#0D0D0D] text-white px-7 py-3.5 rounded-xl hover:bg-[#222] transition-all duration-200 flex items-center gap-2 hover:gap-3 shadow-lg shadow-black/10 hover:shadow-xl hover:shadow-black/15 font-medium text-sm"
+                  className="group bg-[#0a1f3d] text-white px-7 py-3.5 rounded-xl hover:bg-[#162d57] transition-all duration-200 flex items-center gap-2 hover:gap-3 shadow-lg shadow-black/10 hover:shadow-xl hover:shadow-black/15 font-medium text-sm"
                 >
                   <span>Start free benchmark</span>
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                 </button>
                 <Link
                   to="/methodology"
-                  className="px-7 py-3.5 rounded-xl border border-[#DDD8CF] text-[#555] hover:border-[#1C9393] hover:text-[#1C9393] transition-all duration-200 font-medium text-sm flex items-center bg-white/50 hover:bg-white"
+                  className="px-7 py-3.5 rounded-xl border border-[#DDD8CF] text-[#555] hover:border-[#14b8a6] hover:text-[#14b8a6] transition-all duration-200 font-medium text-sm flex items-center bg-white/50 hover:bg-white"
                 >
                   See how it works
                 </Link>
@@ -273,9 +273,9 @@ export default function HomePage() {
                   <div className="text-[10px] text-[#C0BAB0] tracking-[0.15em] uppercase font-medium mb-1">
                     Sample Report
                   </div>
-                  <div className="text-sm font-semibold text-[#1a1a1a]">Your Brand vs Cohort</div>
+                  <div className="text-sm font-semibold text-[#0a1f3d]">Your Brand vs Cohort</div>
                 </div>
-                <span className="px-2.5 py-1 bg-[#ECFDF5] text-[#059669] text-[10px] font-bold tracking-wide rounded-full border border-[#A7F3D0]">
+                <span className="px-2.5 py-1 bg-[#e5faf9] text-[#14b8a6] text-[10px] font-bold tracking-wide rounded-full border border-[#9ae8e3]">
                   LIVE DATA
                 </span>
               </div>
@@ -289,13 +289,13 @@ export default function HomePage() {
                 <div key={i} className="mb-5 last:mb-0">
                   <div className="flex justify-between items-baseline mb-2">
                     <span className="text-xs text-[#6B7280]">{m.label}</span>
-                    <span className="text-sm font-bold text-[#0D0D0D] tabular-nums">
+                    <span className="text-sm font-bold text-[#0a1f3d] tabular-nums">
                       {m.isFloat ? m.your.toFixed(1) : m.your}%
                     </span>
                   </div>
                   <div className="relative h-2 bg-[#F3F0EB] rounded-full overflow-hidden">
                     <div
-                      className="absolute inset-y-0 left-0 bg-[#D1FAE5] rounded-full"
+                      className="absolute inset-y-0 left-0 bg-[#cdf5f2] rounded-full"
                       style={{ width: `${(m.median / m.top) * 100}%` }}
                     />
                     <div
@@ -318,22 +318,22 @@ export default function HomePage() {
                   <div className="w-2 h-2 rounded-full bg-[#10b981] animate-pulse" />
                   <span className="text-xs text-[#6B7280]">Above cohort median</span>
                 </div>
-                <span className="text-xs font-bold text-[#10b981]">Top 30%</span>
+                <span className="text-xs font-bold text-[#14b8a6]">Top 30%</span>
               </div>
 
               {/* Decorative blobs inside card */}
               <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-[#10b981] opacity-[0.05] blur-2xl pointer-events-none" />
-              <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full bg-[#1C9393] opacity-[0.06] blur-xl pointer-events-none" />
+              <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full bg-[#14b8a6] opacity-[0.06] blur-xl pointer-events-none" />
             </div>
 
             {/* Floating stat chips */}
             <div className="absolute -top-5 -left-8 bg-white border border-[#E8E3DA] rounded-2xl px-4 py-3 shadow-xl shadow-black/[0.06]">
               <div className="text-[10px] text-[#C0BAB0] uppercase tracking-wider mb-0.5">Cohort</div>
-              <div className="text-lg font-bold text-[#1C9393]">{cohortConfig.cohort_size}</div>
+              <div className="text-lg font-bold text-[#14b8a6]">{cohortConfig.cohort_size}</div>
             </div>
             <div className="absolute -bottom-5 -right-5 bg-white border border-[#E8E3DA] rounded-2xl px-4 py-3 shadow-xl shadow-black/[0.06]">
               <div className="text-[10px] text-[#C0BAB0] uppercase tracking-wider mb-0.5">Window</div>
-              <div className="text-lg font-bold text-[#1C9393]">{cohortConfig.data_window}</div>
+              <div className="text-lg font-bold text-[#14b8a6]">{cohortConfig.data_window}</div>
             </div>
           </div>
 
@@ -353,7 +353,7 @@ export default function HomePage() {
                 key={i}
                 className="cred-card bg-white border border-[#E8E3DA] rounded-2xl px-6 py-8 text-center shadow-sm hover:shadow-md transition-shadow"
               >
-                <div className="text-4xl font-bold text-[#1C9393] tracking-tight mb-2">{item.val}</div>
+                <div className="text-4xl font-bold text-[#14b8a6] tracking-tight mb-2">{item.val}</div>
                 <div className="text-xs text-[#9CA3AF] uppercase tracking-wider font-medium leading-snug">
                   {item.label}
                 </div>
@@ -362,7 +362,7 @@ export default function HomePage() {
           </div>
           <p className="mt-6 text-center text-sm text-[#9CA3AF]">
             Your brand is benchmarked against this cohort.{" "}
-            <Link to="/methodology" className="text-[#1C9393] font-semibold hover:underline">
+            <Link to="/methodology" className="text-[#14b8a6] font-semibold hover:underline">
               How this works →
             </Link>
           </p>
@@ -376,7 +376,7 @@ export default function HomePage() {
             <div className="text-[10px] text-[#C4BFB8] tracking-[0.2em] uppercase font-medium mb-3">
               Cohort Benchmarks
             </div>
-            <h2 className="text-2xl md:text-3xl font-semibold text-[#0D0D0D] tracking-tight">
+            <h2 className="text-2xl md:text-3xl font-semibold text-[#0a1f3d] tracking-tight">
               India D2C {cohortConfig.data_window_year}
             </h2>
           </div>
@@ -399,7 +399,7 @@ export default function HomePage() {
                     <div className="flex justify-between items-baseline mb-2.5">
                       <span className="text-xs text-[#9CA3AF] font-medium">Cohort median</span>
                       <span
-                        className="count-num text-3xl font-bold text-[#0D0D0D] tabular-nums leading-none"
+                        className="count-num text-3xl font-bold text-[#0a1f3d] tabular-nums leading-none"
                         data-target={s.medianVal}
                         data-suffix={s.suffix}
                         data-float={s.isFloat ? "true" : "false"}
@@ -409,7 +409,7 @@ export default function HomePage() {
                     </div>
                     <div className="h-1.5 bg-[#F3F0EB] rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-[#D1FAE5] rounded-full"
+                        className="h-full bg-[#cdf5f2] rounded-full"
                         style={{ width: `${(s.medianVal / s.topVal) * 100}%` }}
                       />
                     </div>
@@ -422,7 +422,7 @@ export default function HomePage() {
                     <div className="flex justify-between items-baseline mb-2.5">
                       <span className="text-xs text-[#9CA3AF] font-medium">Top quartile</span>
                       <span
-                        className="count-num text-3xl font-bold text-[#10b981] tabular-nums leading-none"
+                        className="count-num text-3xl font-bold text-[#14b8a6] tabular-nums leading-none"
                         data-target={s.topVal}
                         data-suffix={s.suffix}
                         data-float={s.isFloat ? "true" : "false"}
