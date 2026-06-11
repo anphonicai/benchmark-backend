@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import Logo from "../components/Logo";
 import cohortConfig from "../utils/cohortConfig";
+import { resizeLenis } from "../utils/lenisInstance";
 
 // ── Types ────────────────────────────────────────────────────────────────
 interface Gap {
@@ -256,6 +257,7 @@ export default function BenchmarkReportPage() {
       const parsed = JSON.parse(raw);
       const brandInfo = brandInfoRaw ? JSON.parse(brandInfoRaw) : {};
       setData(mapReport(parsed, brandInfo));
+      setTimeout(resizeLenis, 100);
     } catch { /* keep default */ }
   }, []);
 

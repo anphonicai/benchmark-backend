@@ -1,0 +1,15 @@
+import type Lenis from "lenis";
+
+let instance: Lenis | null = null;
+
+export function setLenis(l: Lenis | null) {
+  instance = l;
+}
+
+export function scrollToTop() {
+  instance?.scrollTo(0, { immediate: true });
+}
+
+export function resizeLenis() {
+  instance?.resize();
+}
