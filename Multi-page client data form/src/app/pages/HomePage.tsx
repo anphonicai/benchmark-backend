@@ -206,8 +206,8 @@ export default function HomePage() {
             {/* Headline */}
             <h1
               ref={headlineRef}
-              className="text-5xl md:text-[4.75rem] leading-[1.06] mb-7 font-semibold tracking-tight"
-              style={{ perspective: "600px" }}
+              className="text-5xl md:text-[4.75rem] leading-[1.06] mb-7 tracking-tight"
+              style={{ perspective: "600px", fontFamily: "'Agbalumo', cursive" }}
             >
               <span className="block overflow-hidden">
                 {["Where", "does", "your"].map((w) => (
