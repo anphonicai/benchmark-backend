@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Store Scorecard — Anphonic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=Geist:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy: #1B2B4B;
+  --navy-mid: #2D4270;
+  --navy-light: #E8ECF4;
+  --teal: #1D9E75;
+  --teal-dark: #0F6E56;
+  --teal-light: #E1F5EE;
+  --teal-mid: #5DCAA5;
+  --amber: #BA7517;
+  --amber-light: #FAEEDA;
+  --coral: #D85A30;
+  --coral-light: #FAECE7;
+  --purple: #534AB7;
+  --purple-light: #EEEDFE;
+  --ink: #1a1a1a;
+  --ink-mid: #4a4a4a;
+  --ink-light: #888;
+  --border: #e2e2e0;
+  --bg: #fafaf8;
+  --white: #ffffff;
+  --serif: 'Fraunces', Georgia, serif;
+  --sans: 'Geist', system-ui, sans-serif;
+}
+
+html { -webkit-font-smoothing: antialiased; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 3rem 1.25rem 4rem;
+}
+
+.card {
+  background: var(--white);
+  border: 0.5px solid var(--border);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 680px;
+  overflow: hidden;
+}
+
+/* Header */
+.card-header {
+  background: var(--navy);
+  padding: 2.5rem 2.5rem 2rem;
+  position: relative;
+  overflow: hidden;
+}
+.card-header::after {
+  content: '';
+  position: absolute;
+  bottom: -40px; right: -40px;
+  width: 160px; height: 160px;
+  border-radius: 50%;
+  background: rgba(29,158,117,0.08);
+}
+.header-eyebrow {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 0.6rem;
+}
+.header-title {
+  font-family: var(--serif);
+  font-size: 1.8rem;
+  font-weight: 300;
+  color: var(--white);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin-bottom: 0.6rem;
+}
+.header-sub {
+  font-size: 13px;
+  color: rgba(255,255,255,0.45);
+  line-height: 1.6;
+  max-width: 420px;
+}
+
+/* Month row */
+.month-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 2.5rem;
+  border-bottom: 0.5px solid var(--border);
+  background: var(--bg);
+}
+.month-label {
+  font-size: 12px;
+  color: var(--ink-light);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+.month-input {
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--ink);
+  background: var(--white);
+  border: 0.5px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 10px;
+  outline: none;
+  width: 180px;
+  transition: border-color 0.15s;
+}
+.month-input:focus { border-color: var(--teal); }
+
+/* Score rows */
+.score-rows { padding: 0 2.5rem; }
+
+.score-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1rem;
+  padding: 1.25rem 0;
+  border-bottom: 0.5px solid var(--border);
+  align-items: start;
+}
+.score-item:last-child { border-bottom: none; }
+
+.score-left { min-width: 0; }
+
+.score-area {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--navy);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.area-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.d-teal   { background: var(--teal); }
+.d-amber  { background: var(--amber); }
+.d-coral  { background: var(--coral); }
+.d-purple { background: var(--purple); }
+.d-navy   { background: var(--navy); }
+
+.score-what {
+  font-size: 12px;
+  color: var(--ink-light);
+  line-height: 1.5;
+  padding-left: 15px;
+}
+
+.score-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.max-badge {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-light);
+  background: var(--bg);
+  border: 0.5px solid var(--border);
+  border-radius: 20px;
+  padding: 2px 9px;
+  white-space: nowrap;
+}
+
+.score-input-wrap {
+  position: relative;
+}
+.score-num-input {
+  font-family: var(--sans);
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--navy);
+  background: var(--bg);
+  border: 0.5px solid var(--border);
+  border-radius: 8px;
+  width: 64px;
+  height: 44px;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+  -moz-appearance: textfield;
+}
+.score-num-input::-webkit-outer-spin-button,
+.score-num-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.score-num-input:focus {
+  border-color: var(--teal);
+  background: var(--teal-light);
+}
+.score-num-input.filled {
+  border-color: var(--teal);
+  background: var(--white);
+  color: var(--navy);
+}
+.score-num-input.warn { border-color: var(--amber); }
+
+/* Progress bar */
+.bar-wrap {
+  padding: 0.5rem 0 0;
+  padding-left: 15px;
+}
+.bar-track {
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+  width: 100%;
+}
+.bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.35s ease;
+}
+
+/* Total section */
+.total-section {
+  padding: 1.5rem 2.5rem;
+  background: var(--bg);
+  border-top: 0.5px solid var(--border);
+}
+
+.total-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.total-label {
+  font-size: 13px;
+  color: var(--ink-mid);
+  flex: 1;
+}
+.total-num {
+  font-family: var(--serif);
+  font-size: 2.8rem;
+  font-weight: 300;
+  color: var(--navy);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  transition: color 0.3s;
+}
+.total-num.t-good { color: var(--teal-dark); }
+.total-num.t-mid  { color: var(--amber); }
+.total-num.t-low  { color: var(--coral); }
+
+.total-bar-track {
+  height: 5px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 1.25rem;
+}
+.total-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--navy);
+  transition: width 0.4s ease, background 0.3s;
+}
+.total-bar-fill.b-good { background: var(--teal); }
+.total-bar-fill.b-mid  { background: var(--amber); }
+.total-bar-fill.b-low  { background: var(--coral); }
+
+.verdict-box {
+  background: var(--white);
+  border: 0.5px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  font-size: 13px;
+  color: var(--ink-mid);
+  line-height: 1.6;
+  min-height: 56px;
+  transition: border-color 0.3s;
+}
+.verdict-box.v-empty { color: var(--ink-light); }
+.verdict-box.v-good  { border-color: var(--teal); }
+.verdict-box.v-mid   { border-color: var(--amber); }
+.verdict-box.v-low   { border-color: var(--coral); }
+
+.verdict-title {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+}
+.vt-good  { color: var(--teal-dark); }
+.vt-mid   { color: var(--amber); }
+.vt-low   { color: var(--coral); }
+
+/* Footer */
+.card-footer {
+  padding: 1rem 2.5rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 0.5px solid var(--border);
+}
+.footer-brand {
+  font-family: var(--serif);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--navy);
+  opacity: 0.5;
+  text-decoration: none;
+}
+.print-btn {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-light);
+  background: none;
+  border: 0.5px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.print-btn:hover { color: var(--navy); border-color: var(--navy); }
+
+@media (max-width: 500px) {
+  body { padding: 1.25rem 0.75rem 3rem; }
+  .card-header { padding: 2rem 1.5rem 1.5rem; }
+  .header-title { font-size: 1.5rem; }
+  .month-row { padding: 0.9rem 1.5rem; }
+  .score-rows { padding: 0 1.5rem; }
+  .total-section { padding: 1.25rem 1.5rem; }
+  .card-footer { padding: 0.9rem 1.5rem 1.25rem; }
+  .score-num-input { width: 56px; height: 40px; font-size: 16px; }
+}
+
+@media print {
+  body { background: white; padding: 0; }
+  .card { border: none; border-radius: 0; max-width: 100%; }
+  .print-btn { display: none; }
+  .score-num-input { background: white !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <div class="card-header">
+    <div class="header-eyebrow">Anphonic — Monthly self-scoring model</div>
+    <div class="header-title">Store scorecard</div>
+    <div class="header-sub">100 points total. Fill this in on the 1st of each month. Your score tells you where to put the next 30 days.</div>
+  </div>
+
+  <div class="month-row">
+    <span class="month-label">Month</span>
+    <input class="month-input" type="text" placeholder="e.g. June 2026" id="month-field">
+  </div>
+
+  <div class="score-rows">
+
+    <div class="score-item">
+      <div class="score-left">
+        <div class="score-area"><span class="area-dot d-navy"></span>PDP quality</div>
+        <div class="score-what">Sticky ATC, above-fold price and benefit, mobile load under 3 seconds</div>
+        <div class="bar-wrap">
+          <div class="bar-track"><div class="bar-fill d-navy" id="bar-1" style="width:0%; background:var(--navy)"></div></div>
+        </div>
+      </div>
+      <div class="score-right">
+        <div class="max-badge">Max 20</div>
+        <input class="score-num-input" type="number" min="0" max="20" placeholder="—" id="s1" data-max="20" data-bar="bar-1" data-color="navy" autocomplete="off">
+      </div>
+    </div>
+
+    <div class="score-item">
+      <div class="score-left">
+        <div class="score-area"><span class="area-dot d-amber"></span>Social proof</div>
+        <div class="score-what">Rating aggregate visible, UGC present, reviews from last 30 days</div>
+        <div class="bar-wrap">
+          <div class="bar-track"><div class="bar-fill" id="bar-2" style="width:0%; background:var(--amber)"></div></div>
+        </div>
+      </div>
+      <div class="score-right">
+        <div class="max-badge">Max 15</div>
+        <input class="score-num-input" type="number" min="0" max="15" placeholder="—" id="s2" data-max="15" data-bar="bar-2" autocomplete="off">
+      </div>
+    </div>
+
+    <div class="score-item">
+      <div class="score-left">
+        <div class="score-area"><span class="area-dot d-coral"></span>Cart experience</div>
+        <div class="score-what">Cart drawer live, free shipping bar, cross-sell in cart</div>
+        <div class="bar-wrap">
+          <div class="bar-track"><div class="bar-fill" id="bar-3" style="width:0%; background:var(--coral)"></div></div>
+        </div>
+      </div>
+      <div class="score-right">
+        <div class="max-badge">Max 15</div>
+        <input class="score-num-input" type="number" min="0" max="15" placeholder="—" id="s3" data-max="15" data-bar="bar-3" autocomplete="off">
+      </div>
+    </div>
+
+    <div class="score-item">
+      <div class="score-left">
+        <div class="score-area"><span class="area-dot d-purple"></span>Bundling and AOV</div>
+        <div class="score-what">At least one bundle live, cross-sell powered by order data</div>
+        <div class="bar-wrap">
+          <div class="bar-track"><div class="bar-fill" id="bar-4" style="width:0%; background:var(--purple)"></div></div>
+        </div>
+      </div>
+      <div class="score-right">
+        <div class="max-badge">Max 15</div>
+        <input class="score-num-input" type="number" min="0" max="15" placeholder="—" id="s4" data-max="15" data-bar="bar-4" autocomplete="off">
+      </div>
+    </div>
+
+    <div class="score-item">
+      <div class="score-left">
+        <div class="score-area"><span class="area-dot d-teal"></span>Retention flows</div>
+        <div class="score-what">WhatsApp post-purchase flow live, repeat rate tracked monthly</div>
+        <div class="bar-wrap">
+          <div class="bar-track"><div class="bar-fill" id="bar-5" style="width:0%; background:var(--teal)"></div></div>
+        </div>
+      </div>
+      <div class="score-right">
+        <div class="max-badge">Max 20</div>
+        <input class="score-num-input" type="number" min="0" max="20" placeholder="—" id="s5" data-max="20" data-bar="bar-5" autocomplete="off">
+      </div>
+    </div>
+
+    <div class="score-item">
+      <div class="score-left">
+        <div class="score-area"><span class="area-dot d-teal"></span>Loyalty infrastructure</div>
+        <div class="score-what">Loyalty app live, works with your checkout, coins redeemable via WhatsApp</div>
+        <div class="bar-wrap">
+          <div class="bar-track"><div class="bar-fill" id="bar-6" style="width:0%; background:var(--teal)"></div></div>
+        </div>
+      </div>
+      <div class="score-right">
+        <div class="max-badge">Max 15</div>
+        <input class="score-num-input" type="number" min="0" max="15" placeholder="—" id="s6" data-max="15" data-bar="bar-6" autocomplete="off">
+      </div>
+    </div>
+
+  </div>
+
+  <div class="total-section">
+    <div class="total-row">
+      <div class="total-label">Total score out of 100</div>
+      <div class="total-num" id="total-num">—</div>
+    </div>
+    <div class="total-bar-track">
+      <div class="total-bar-fill" id="total-bar" style="width: 0%"></div>
+    </div>
+    <div class="verdict-box v-empty" id="verdict">
+      Fill in your scores above to see your verdict.
+    </div>
+  </div>
+
+  <div class="card-footer">
+    <a href="https://anphonic.ai" class="footer-brand">Anphonic</a>
+    <button class="print-btn" onclick="window.print()">Save as PDF</button>
+  </div>
+
+</div>
+
+<script>
+const inputs = document.querySelectorAll('.score-num-input');
+
+function update() {
+  let total = 0;
+  let filled = 0;
+
+  inputs.forEach(input => {
+    const max = parseInt(input.dataset.max);
+    const raw = parseInt(input.value);
+    const bar = document.getElementById(input.dataset.bar);
+
+    if (!isNaN(raw) && input.value !== '') {
+      const clamped = Math.min(Math.max(raw, 0), max);
+      total += clamped;
+      filled++;
+      input.classList.add('filled');
+      input.classList.toggle('warn', clamped < max * 0.5);
+      if (bar) bar.style.width = Math.round((clamped / max) * 100) + '%';
+    } else {
+      input.classList.remove('filled', 'warn');
+      if (bar) bar.style.width = '0%';
+    }
+  });
+
+  const numEl = document.getElementById('total-num');
+  const barEl = document.getElementById('total-bar');
+  const verdictEl = document.getElementById('verdict');
+
+  if (filled === 0) {
+    numEl.textContent = '—';
+    numEl.className = 'total-num';
+    barEl.style.width = '0%';
+    barEl.className = 'total-bar-fill';
+    verdictEl.innerHTML = 'Fill in your scores above to see your verdict.';
+    verdictEl.className = 'verdict-box v-empty';
+    return;
+  }
+
+  numEl.textContent = total + '/100';
+  barEl.style.width = total + '%';
+
+  if (total >= 80) {
+    numEl.className = 'total-num t-good';
+    barEl.className = 'total-bar-fill b-good';
+    verdictEl.className = 'verdict-box v-good';
+    verdictEl.innerHTML = '<div class="verdict-title vt-good">Strong foundation</div>You are in the top quartile. Identify your single lowest-scoring area and make one targeted improvement this month. Maintain what is already working.';
+  } else if (total >= 55) {
+    numEl.className = 'total-num t-mid';
+    barEl.className = 'total-bar-fill b-mid';
+    verdictEl.className = 'verdict-box v-mid';
+    verdictEl.innerHTML = '<div class="verdict-title vt-mid">Mid-table</div>Pick your two lowest-scoring areas and fix one concrete thing in each this month. Do not start new initiatives until these are resolved.';
+  } else {
+    numEl.className = 'total-num t-low';
+    barEl.className = 'total-bar-fill b-low';
+    verdictEl.className = 'verdict-box v-low';
+    verdictEl.innerHTML = '<div class="verdict-title vt-low">Clear gaps visible</div>Start with PDP quality and retention flows, in that order. Both have high-impact fixes that cost little to implement and compound quickly.';
+  }
+}
+
+inputs.forEach(input => {
+  input.addEventListener('input', update);
+  input.addEventListener('change', () => {
+    const max = parseInt(input.dataset.max);
+    const raw = parseInt(input.value);
+    if (!isNaN(raw)) input.value = Math.min(Math.max(raw, 0), max);
+    update();
+  });
+});
+</script>
+</body>
+</html>

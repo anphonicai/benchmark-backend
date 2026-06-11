@@ -170,9 +170,91 @@ function VerdictHeadline({ text }: { text: string }) {
   );
 }
 
+// ── Calendar slots ────────────────────────────────────────────────────────
+const CALENDAR_SLOTS = [
+  { label: 'Book a session · Option A', url: 'https://calendar.app.google/nwch6oMUqo9gHTnK9' },
+  { label: 'Book a session · Option B', url: 'https://calendar.app.google/eBoyKNzeUxUvhmUU8' },
+  { label: 'Book a session · Option C', url: 'https://calendar.app.google/2XQVSd57xK9B49Y68' },
+];
+
+// ── Calendar Modal ────────────────────────────────────────────────────────
+function CalendarModal({ onClose, teal, navy }: { onClose: () => void; teal: string; navy: string }) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ backgroundColor: 'rgba(11,24,41,0.75)', backdropFilter: 'blur(4px)' }}
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div
+        className="w-full max-w-md rounded-2xl overflow-hidden shadow-2xl"
+        style={{ animation: 'modalPop 0.22s cubic-bezier(0.34,1.56,0.64,1)' }}
+      >
+        {/* Head */}
+        <div className="relative px-8 py-7" style={{ backgroundColor: navy }}>
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 w-7 h-7 rounded-full flex items-center justify-center text-sm transition-opacity hover:opacity-80"
+            style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)' }}
+          >
+            ✕
+          </button>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: teal }}>
+            Free · 20 minutes · No commitment
+          </p>
+          <h3 className="text-xl font-normal text-white leading-snug mb-1">
+            Book your diagnostic call
+          </h3>
+          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.45)' }}>
+            We'll walk through your gaps and show how top quartile brands close them.
+          </p>
+        </div>
+        {/* Body */}
+        <div className="px-8 py-6 bg-white">
+          <p className="text-xs mb-4" style={{ color: '#888' }}>
+            Pick any slot — all open Google Calendar booking.
+          </p>
+          {CALENDAR_SLOTS.map((slot, i) => (
+            <a
+              key={i}
+              href={slot.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-between rounded-xl px-5 py-4 mb-3 last:mb-0 transition-colors group"
+              style={{ background: '#fafaf8', border: '0.5px solid #e2e2e0' }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLAnchorElement).style.borderColor = teal;
+                (e.currentTarget as HTMLAnchorElement).style.background = '#e1f5ee';
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLAnchorElement).style.borderColor = '#e2e2e0';
+                (e.currentTarget as HTMLAnchorElement).style.background = '#fafaf8';
+              }}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: '#e1f5ee' }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={teal} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                </div>
+                <div>
+                  <div className="text-sm font-medium" style={{ color: navy }}>{slot.label}</div>
+                  <div className="text-xs" style={{ color: '#888' }}>Opens Google Calendar · 20 min</div>
+                </div>
+              </div>
+              <span style={{ color: teal, fontSize: 16 }}>→</span>
+            </a>
+          ))}
+        </div>
+      </div>
+      <style>{`@keyframes modalPop { from { transform: scale(0.93); opacity: 0; } to { transform: scale(1); opacity: 1; } }`}</style>
+    </div>
+  );
+}
+
 // ── Component ─────────────────────────────────────────────────────────────
 export default function BenchmarkReportPage() {
   const [data, setData] = useState<ReportData>(defaultData);
+  const [showCalModal, setShowCalModal] = useState(false);
   const generatedRef = useRef(
     new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase()
   );
@@ -211,8 +293,8 @@ export default function BenchmarkReportPage() {
         <div className="flex items-center justify-between mb-10 md:mb-16 print:hidden">
           <Logo variant="dark" />
           <a
-            href="https://drive.google.com/uc?export=download&id=1I7geihmjOueHGG69zHNbki6u8JGydEDL"
-            target="_blank" rel="noopener noreferrer"
+            href="/shelf-index.html"
+            download="The_Shelf_Index_Edition01.html"
             className="text-xs tracking-widest border px-4 py-2 rounded transition-opacity hover:opacity-70"
             style={{ color: TEAL, borderColor: TEAL }}
           >
@@ -403,17 +485,16 @@ export default function BenchmarkReportPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
-            <a
-              href="https://www.anphonic.ai/"
-              target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-lg text-white font-medium hover:opacity-90 transition-opacity"
-              style={{ backgroundColor: NAVY }}
+            <button
+              onClick={() => setShowCalModal(true)}
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-lg text-white font-medium hover:opacity-90 transition-opacity cursor-pointer"
+              style={{ backgroundColor: NAVY, border: 'none' }}
             >
               Book a 20-minute diagnostic →
-            </a>
+            </button>
             <a
-              href="https://drive.google.com/uc?export=download&id=1I7geihmjOueHGG69zHNbki6u8JGydEDL"
-              target="_blank" rel="noopener noreferrer"
+              href="/shelf-index.html"
+              download="The_Shelf_Index_Edition01.html"
               className="inline-flex items-center gap-2 px-8 py-4 rounded-lg font-medium border hover:opacity-70 transition-opacity"
               style={{ color: NAVY, borderColor: NAVY }}
             >
@@ -426,6 +507,15 @@ export default function BenchmarkReportPage() {
           </p>
         </div>
       </section>
+
+      {/* ── CALENDAR MODAL ───────────────────────────────────────────── */}
+      {showCalModal && (
+        <CalendarModal
+          onClose={() => setShowCalModal(false)}
+          teal={TEAL}
+          navy={NAVY}
+        />
+      )}
 
     </div>
   );
