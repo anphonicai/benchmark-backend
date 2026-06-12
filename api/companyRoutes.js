@@ -36,6 +36,25 @@ const otpVerifyLimiter = rateLimit({
 
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
+async function verifyTurnstile(token, ip) {
+  if (!token) return false;
+  const body = new URLSearchParams({
+    secret: process.env.TURNSTILE_SECRET_KEY,
+    response: token,
+    ...(ip ? { remoteip: ip } : {}),
+  });
+  try {
+    const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      body,
+    });
+    const data = await res.json();
+    return data.success === true;
+  } catch {
+    return false;
+  }
+}
+
 const SHOPIFY_HEADERS = ['x-shopid', 'x-shopify-stage', 'x-shardid', 'x-sorting-hat-podid', 'shopify-complexity-score'];
 const BLOCKLISTED_HOSTS = /localhost|127\.0\.0\.1|0\.0\.0\.0|192\.168\.|^10\.|example\.com|test\.com/i;
 
@@ -304,7 +323,12 @@ router.post('/shopifyql', async (req, res) => {
 // POST /api/companies/benchmark/manual
 router.post('/benchmark/manual', submissionLimiter, async (req, res) => {
   console.log('manual benchmark route hit');
-  
+
+  const captchaOk = await verifyTurnstile(req.body.captchaToken, req.ip);
+  if (!captchaOk) {
+    return res.status(400).json({ success: false, message: 'Security check failed. Please refresh and try again.' });
+  }
+
   const {
     company_id,
     company_name,
@@ -521,7 +545,12 @@ router.get('/metrics', requireAdminKey, async (req, res) => {
 // POST /api/companies/brand-info - Store brand info from step 01 (BrandInfoPage)
 router.post('/brand-info', submissionLimiter, async (req, res) => {
   console.log('POST /api/companies/brand-info hit');
-  
+
+  const captchaOk = await verifyTurnstile(req.body.captchaToken, req.ip);
+  if (!captchaOk) {
+    return res.status(400).json({ success: false, message: 'Security check failed. Please refresh and try again.' });
+  }
+
   const {
     fullName,
     role,

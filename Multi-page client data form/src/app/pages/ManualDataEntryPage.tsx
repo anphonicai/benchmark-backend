@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import { ArrowLeft } from "lucide-react";
+import { Turnstile } from "@marsidev/react-turnstile";
 import Logo from "../components/Logo";
 import Chatbot from "../components/Chatbot";
 import gsap from "gsap";
@@ -9,6 +10,9 @@ export default function ManualDataEntryPage() {
   const navigate = useNavigate();
   const headerRef = useRef<HTMLElement>(null);
   const mainRef = useRef<HTMLDivElement>(null);
+
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaError, setCaptchaError] = useState("");
 
   const [formData, setFormData] = useState({
     category: "",
@@ -29,6 +33,11 @@ export default function ManualDataEntryPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!captchaToken) {
+      setCaptchaError("Please complete the security check.");
+      return;
+    }
+    setCaptchaError("");
     const brandInfoRaw = localStorage.getItem('brandInfo');
     const brandInfo = brandInfoRaw ? JSON.parse(brandInfoRaw) : {};
     const existingCompanyId = localStorage.getItem('companyId');
@@ -60,7 +69,7 @@ export default function ManualDataEntryPage() {
     fetch('/api/companies/benchmark/manual', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ ...payload, captchaToken }),
     })
       .then((res) => res.json())
       .then((data) => {
@@ -273,6 +282,22 @@ export default function ManualDataEntryPage() {
                 </select>
               </div>
             </div>
+          </div>
+
+          <div className="flex flex-col items-center gap-2">
+            <Turnstile
+              siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
+              onSuccess={(token) => {
+                setCaptchaToken(token);
+                setCaptchaError("");
+              }}
+              onExpire={() => setCaptchaToken(null)}
+              onError={() => setCaptchaToken(null)}
+              options={{ theme: "light", size: "normal" }}
+            />
+            {captchaError && (
+              <p className="text-red-400 text-xs">{captchaError}</p>
+            )}
           </div>
 
           <button

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import { AlertCircle, CheckCircle2, Loader2, XCircle } from "lucide-react";
+import { Turnstile } from "@marsidev/react-turnstile";
 import Logo from "../components/Logo";
 import gsap from "gsap";
 
@@ -26,6 +27,7 @@ export default function BrandInfoPage() {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [shopifyVerify, setShopifyVerify] = useState('idle' as 'idle' | 'checking' | 'valid' | 'invalid');
   const [shopifyVerifyMsg, setShopifyVerifyMsg] = useState('');
   const [emailVerify, setEmailVerify] = useState('idle' as 'idle' | 'sending' | 'sent' | 'verifying' | 'verified');
@@ -201,6 +203,10 @@ export default function BrandInfoPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!captchaToken) {
+      setErrors((prev: Record<string, string>) => ({ ...prev, captcha: "Please complete the security check." }));
+      return;
+    }
     if (shopifyVerify === 'checking') {
       setErrors((prev: Record<string, string>) => ({ ...prev, shopifyUrl: "Please wait — verifying your Shopify store URL." }));
       return;
@@ -223,7 +229,7 @@ export default function BrandInfoPage() {
     fetch('/api/companies/brand-info', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(cleanedData),
+      body: JSON.stringify({ ...cleanedData, captchaToken }),
     })
       .then((res) => res.json())
       .then((data) => {
@@ -500,6 +506,22 @@ export default function BrandInfoPage() {
             <p className="text-sm text-[#6B7280]">
               Your data stays anonymous in benchmarks. We never resell or expose individual brand metrics.
             </p>
+          </div>
+
+          <div className="flex flex-col items-center gap-2">
+            <Turnstile
+              siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
+              onSuccess={(token) => {
+                setCaptchaToken(token);
+                setErrors((prev) => ({ ...prev, captcha: "" }));
+              }}
+              onExpire={() => setCaptchaToken(null)}
+              onError={() => setCaptchaToken(null)}
+              options={{ theme: "light", size: "normal" }}
+            />
+            {errors.captcha && (
+              <p className="text-red-400 text-xs">{errors.captcha}</p>
+            )}
           </div>
 
           <button
