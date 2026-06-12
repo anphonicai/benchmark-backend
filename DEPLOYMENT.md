@@ -96,6 +96,7 @@ If your change requires a new env variable (like `ADMIN_API_KEY`):
 | `RESEND_API_KEY` | Email delivery (OTP emails) |
 | `GROQ_API_KEY` | AI chatbot (Groq/Llama) |
 | `ADMIN_API_KEY` | Protects `/metrics` and `/report` endpoints |
+| `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile server-side verification |
 
 ---
 

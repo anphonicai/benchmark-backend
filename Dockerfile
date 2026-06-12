@@ -7,6 +7,9 @@ WORKDIR /build/frontend
 COPY ["Multi-page client data form/package.json", "Multi-page client data form/package-lock.json", "./"]
 RUN npm ci --legacy-peer-deps
 
+# Public site key — safe to embed here (it's client-side JS, not a secret)
+ENV VITE_TURNSTILE_SITE_KEY=0x4AAAAAADjZ83tDZARNv-ZB
+
 # Copy source and build (outDir is ../client per vite.config.ts)
 COPY ["Multi-page client data form/src/", "./src/"]
 COPY ["Multi-page client data form/public/", "./public/"]
