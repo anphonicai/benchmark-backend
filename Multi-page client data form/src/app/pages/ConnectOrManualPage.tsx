@@ -46,34 +46,10 @@ export default function ConnectOrManualPage() {
         {/* Options */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-7">
 
-          {/* Connect Shopify — Coming Soon */}
-          <div className="relative bg-white border border-[#E8E3DA] rounded-2xl p-8 cursor-not-allowed opacity-50 shadow-sm">
-            <div className="absolute -top-3 left-7 bg-[#9CA3AF] text-white text-[10px] font-semibold px-3 py-1 rounded-full tracking-wider uppercase">
-              Coming Soon
-            </div>
-            <div className="w-12 h-12 bg-[#F3F0EB] rounded-xl flex items-center justify-center mb-6">
-              <ShoppingBag className="w-5 h-5 text-[#9CA3AF]" />
-            </div>
-            <h2 className="text-xl font-semibold text-[#9CA3AF] mb-3" style={{ fontFamily: "'Playfair Display', serif" }}>
-              Connect Shopify
-            </h2>
-            <p className="text-[#9CA3AF] text-sm mb-8 leading-relaxed">
-              Read-only API token. We pull 90 days of order and customer data, compute your metrics, then disconnect.
-            </p>
-            <div className="space-y-3">
-              {[["TIME", "60 seconds"], ["PRECISION", "High"], ["OUTPUT", "Verified benchmark"]].map(([k, v]) => (
-                <div key={k} className="flex justify-between items-center">
-                  <span className="text-xs text-[#C4BFB8] tracking-wider font-medium">{k}</span>
-                  <span className="text-sm text-[#9CA3AF]">{v}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Enter Manually — Recommended */}
+          {/* Enter Manually — Recommended (first on mobile) */}
           <div
             onClick={() => navigate("/manual-entry")}
-            className="relative bg-white border-2 border-[#14b8a6] rounded-2xl p-8 cursor-pointer hover:shadow-xl hover:shadow-[#14b8a6]/10 transition-all duration-200 shadow-sm"
+            className="relative bg-white border-2 border-[#14b8a6] rounded-2xl p-8 cursor-pointer hover:shadow-xl hover:shadow-[#14b8a6]/10 transition-all duration-200 shadow-sm order-first md:order-last"
           >
             <div className="absolute -top-3 left-7 bg-[#14b8a6] text-white text-[10px] font-semibold px-3 py-1 rounded-full tracking-wider uppercase">
               Recommended
@@ -92,6 +68,30 @@ export default function ConnectOrManualPage() {
                 <div key={k} className="flex justify-between items-center">
                   <span className="text-xs text-[#C4BFB8] tracking-wider font-medium">{k}</span>
                   <span className="text-sm text-[#0a1f3d] font-medium">{v}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Connect Shopify — Coming Soon (second on mobile) */}
+          <div className="relative bg-white border border-[#E8E3DA] rounded-2xl p-8 cursor-not-allowed opacity-50 shadow-sm order-last md:order-first">
+            <div className="absolute -top-3 left-7 bg-[#9CA3AF] text-white text-[10px] font-semibold px-3 py-1 rounded-full tracking-wider uppercase">
+              Coming Soon
+            </div>
+            <div className="w-12 h-12 bg-[#F3F0EB] rounded-xl flex items-center justify-center mb-6">
+              <ShoppingBag className="w-5 h-5 text-[#9CA3AF]" />
+            </div>
+            <h2 className="text-xl font-semibold text-[#9CA3AF] mb-3" style={{ fontFamily: "'Playfair Display', serif" }}>
+              Connect Shopify
+            </h2>
+            <p className="text-[#9CA3AF] text-sm mb-8 leading-relaxed">
+              Read-only API token. We pull 90 days of order and customer data, compute your metrics, then disconnect.
+            </p>
+            <div className="space-y-3">
+              {[["TIME", "60 seconds"], ["PRECISION", "High"], ["OUTPUT", "Verified benchmark"]].map(([k, v]) => (
+                <div key={k} className="flex justify-between items-center">
+                  <span className="text-xs text-[#C4BFB8] tracking-wider font-medium">{k}</span>
+                  <span className="text-sm text-[#9CA3AF]">{v}</span>
                 </div>
               ))}
             </div>
