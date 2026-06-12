@@ -436,7 +436,7 @@ export default function BrandInfoPage() {
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="yourbrand.com or www.yourbrand.com"
+                  placeholder=""
                   value={formData.shopifyUrl}
                   onChange={(e) => {
                     setFormData({ ...formData, shopifyUrl: e.target.value });
