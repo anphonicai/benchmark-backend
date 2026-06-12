@@ -1,11 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import { ArrowLeft } from "lucide-react";
 import Logo from "../components/Logo";
 import Chatbot from "../components/Chatbot";
+import gsap from "gsap";
 
 export default function ManualDataEntryPage() {
   const navigate = useNavigate();
+  const headerRef = useRef<HTMLElement>(null);
+  const mainRef = useRef<HTMLDivElement>(null);
+
   const [formData, setFormData] = useState({
     category: "",
     averageOrderValue: "",
@@ -17,6 +21,11 @@ export default function ManualDataEntryPage() {
     postPurchaseUpsell: "",
     whatsappTool: "",
   });
+
+  useEffect(() => {
+    gsap.fromTo(headerRef.current, { y: -20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" });
+    gsap.fromTo(mainRef.current, { y: 28, opacity: 0 }, { y: 0, opacity: 1, duration: 0.65, ease: "power2.out", delay: 0.2 });
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,36 +82,57 @@ export default function ManualDataEntryPage() {
       });
   };
 
-  const inputCls = "w-full px-4 py-3 bg-white border border-[#d4d4d4] rounded-lg focus:outline-none focus:border-[#1a1a1a]";
+  const inputCls = "w-full px-4 py-3 bg-white border border-[#E8E3DA] rounded-xl focus:outline-none focus:border-[#14b8a6] transition-colors text-[#0a1f3d] placeholder:text-[#C4BFB8]";
+  const selectCls = inputCls + " appearance-none";
 
   return (
-    <div className="min-h-screen bg-[#f8f6f3]">
+    <div className="min-h-screen bg-[#F5F3EF]">
       <Chatbot />
-      <header className="px-4 py-4 md:px-12 md:py-6">
+      <header
+        ref={headerRef}
+        className="flex justify-between items-center px-6 py-5 md:px-16 md:py-6 border-b border-[#E8E3DA] bg-[#F5F3EF]/80 backdrop-blur-sm"
+      >
         <Logo />
       </header>
 
-      <main className="px-4 py-8 md:px-12 md:py-16 max-w-5xl mx-auto">
-        <div className="text-sm text-[#999] mb-6">03 · TELL US YOUR NUMBERS</div>
+      <main ref={mainRef} className="px-6 py-10 md:px-16 md:py-16 max-w-5xl mx-auto">
+        {/* Step indicator */}
+        <div className="inline-flex items-center gap-2 mb-8">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#14b8a6]" />
+          <span className="text-xs text-[#14b8a6] font-semibold tracking-[0.16em] uppercase">
+            03 · Tell us your numbers
+          </span>
+        </div>
 
-        <h1 className="text-2xl md:text-4xl mb-4">Manual Benchmark</h1>
-        <p className="text-[#666] text-base md:text-lg mb-8 md:mb-12">
-          Six questions, three minutes.
-          <br />
-          Use rough estimates if you don't have exact figures. We'll benchmark you directionally against the cohort.
+        <h1
+          className="text-2xl md:text-4xl text-[#0a1f3d] mb-4 leading-tight"
+          style={{ fontFamily: "'Playfair Display', serif" }}
+        >
+          Manual Benchmark
+        </h1>
+        <p className="text-[#6B7280] text-base md:text-lg mb-10 leading-relaxed max-w-xl">
+          Six questions, three minutes. Use rough estimates if you don't have exact figures.
+          We'll benchmark you directionally against the cohort.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="bg-white rounded-2xl p-8 space-y-6">
+          <div className="bg-white border border-[#E8E3DA] rounded-2xl p-6 md:p-8 shadow-sm space-y-6">
+
+            {/* Section label */}
+            <div className="text-[10px] text-[#C4BFB8] tracking-[0.2em] uppercase font-medium pb-2 border-b border-[#F3F0EB]">
+              Store Metrics
+            </div>
 
             {/* Row 1 — Category | AOV */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm text-[#666] mb-2">Category</label>
+                <label className="block text-xs font-semibold text-[#6B7280] tracking-[0.12em] uppercase mb-2">
+                  Category
+                </label>
                 <select
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className={inputCls + " appearance-none"}
+                  className={selectCls}
                 >
                   <option value="">Select category</option>
                   <option value="Food & Beverage">Food & Beverage</option>
@@ -111,7 +141,9 @@ export default function ManualDataEntryPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm text-[#666] mb-2">Average order value (INR)</label>
+                <label className="block text-xs font-semibold text-[#6B7280] tracking-[0.12em] uppercase mb-2">
+                  Average Order Value (INR)
+                </label>
                 <input
                   type="number"
                   placeholder="e.g., 1200"
@@ -125,7 +157,9 @@ export default function ManualDataEntryPage() {
             {/* Row 2 — OPM | Add to Cart % */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm text-[#666] mb-2">Estimated orders / month</label>
+                <label className="block text-xs font-semibold text-[#6B7280] tracking-[0.12em] uppercase mb-2">
+                  Estimated Orders / Month
+                </label>
                 <input
                   type="number"
                   placeholder="e.g., 2500"
@@ -135,8 +169,8 @@ export default function ManualDataEntryPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm text-[#666] mb-2">
-                  Add to cart rate (%) <span className="text-red-500">*</span>
+                <label className="block text-xs font-semibold text-[#6B7280] tracking-[0.12em] uppercase mb-2">
+                  Add to Cart Rate (%) <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="number"
@@ -150,11 +184,11 @@ export default function ManualDataEntryPage() {
               </div>
             </div>
 
-            {/* Row 3 — Repeat Revenue Share % | Time to 2nd */}
+            {/* Row 3 — Repeat Revenue | Time to 2nd */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm text-[#666] mb-2">
-                  Repeat revenue share (%) <span className="text-red-500">*</span>
+                <label className="block text-xs font-semibold text-[#6B7280] tracking-[0.12em] uppercase mb-2">
+                  Repeat Revenue Share (%) <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="number"
@@ -167,8 +201,8 @@ export default function ManualDataEntryPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm text-[#666] mb-2">
-                  Time to 2nd order (days) <span className="text-red-500">*</span>
+                <label className="block text-xs font-semibold text-[#6B7280] tracking-[0.12em] uppercase mb-2">
+                  Time to 2nd Order (days) <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="number"
@@ -181,14 +215,21 @@ export default function ManualDataEntryPage() {
               </div>
             </div>
 
+            {/* Section label */}
+            <div className="text-[10px] text-[#C4BFB8] tracking-[0.2em] uppercase font-medium pt-2 pb-2 border-b border-[#F3F0EB]">
+              Retention Tools
+            </div>
+
             {/* Row 4 — Tools */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               <div>
-                <label className="block text-sm text-[#666] mb-2">Loyalty</label>
+                <label className="block text-xs font-semibold text-[#6B7280] tracking-[0.12em] uppercase mb-2">
+                  Loyalty
+                </label>
                 <select
                   value={formData.loyalty}
                   onChange={(e) => setFormData({ ...formData, loyalty: e.target.value })}
-                  className={inputCls + " appearance-none"}
+                  className={selectCls}
                 >
                   <option value="">Select option</option>
                   <option value="Nector">Nector</option>
@@ -197,11 +238,13 @@ export default function ManualDataEntryPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm text-[#666] mb-2">Post-purchase upsell</label>
+                <label className="block text-xs font-semibold text-[#6B7280] tracking-[0.12em] uppercase mb-2">
+                  Post-purchase Upsell
+                </label>
                 <select
                   value={formData.postPurchaseUpsell}
                   onChange={(e) => setFormData({ ...formData, postPurchaseUpsell: e.target.value })}
-                  className={inputCls + " appearance-none"}
+                  className={selectCls}
                 >
                   <option value="">Select option</option>
                   <option value="Yes, fully implemented">Yes, fully implemented</option>
@@ -210,11 +253,13 @@ export default function ManualDataEntryPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm text-[#666] mb-2">WhatsApp tool</label>
+                <label className="block text-xs font-semibold text-[#6B7280] tracking-[0.12em] uppercase mb-2">
+                  WhatsApp Tool
+                </label>
                 <select
                   value={formData.whatsappTool}
                   onChange={(e) => setFormData({ ...formData, whatsappTool: e.target.value })}
-                  className={inputCls + " appearance-none"}
+                  className={selectCls}
                 >
                   <option value="">Select option</option>
                   <option value="Interakt">Interakt</option>
@@ -232,7 +277,7 @@ export default function ManualDataEntryPage() {
 
           <button
             type="submit"
-            className="w-full bg-[#0066ff] text-white px-8 py-4 rounded-lg hover:bg-[#0052cc] transition-colors"
+            className="w-full bg-[#0a1f3d] text-white px-8 py-4 rounded-xl hover:bg-[#162d57] transition-all duration-200 font-medium tracking-widest shadow-lg shadow-black/10 hover:shadow-xl"
           >
             CALCULATE SHELF SCORE
           </button>
@@ -240,7 +285,7 @@ export default function ManualDataEntryPage() {
 
         <button
           onClick={() => navigate("/connect-or-manual")}
-          className="flex items-center gap-2 text-[#666] hover:text-[#1a1a1a] mt-12 transition-colors"
+          className="flex items-center gap-2 text-[#9CA3AF] hover:text-[#14b8a6] mt-10 transition-colors text-sm font-medium"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back</span>

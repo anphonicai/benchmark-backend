@@ -6,8 +6,8 @@ interface LogoProps {
   variant?: "light" | "dark";
 }
 
-// variant="light" (default) → black-bg logo for light/cream page backgrounds
-// variant="dark"            → white-bg logo for dark page backgrounds (e.g. NAVY header)
+// variant="light" (default) → dark logo for cream/light backgrounds
+// variant="dark"            → white logo for dark backgrounds (e.g. report page navy header)
 export default function Logo({ variant = "light" }: LogoProps) {
   return (
     <ImageWithFallback

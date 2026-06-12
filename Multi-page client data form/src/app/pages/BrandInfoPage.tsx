@@ -1,15 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import { AlertCircle, CheckCircle2, Loader2, XCircle } from "lucide-react";
 import Logo from "../components/Logo";
+import gsap from "gsap";
 
 const inputClass = (error: string) =>
-  `w-full px-4 py-3 bg-white border rounded-lg focus:outline-none transition-colors ${
-    error ? "border-red-400 focus:border-red-500" : "border-[#d4d4d4] focus:border-[#1a1a1a]"
+  `w-full px-4 py-3 bg-white border rounded-xl focus:outline-none transition-colors text-[#0a1f3d] placeholder:text-[#C4BFB8] ${
+    error ? "border-red-300 focus:border-red-400" : "border-[#E8E3DA] focus:border-[#14b8a6]"
   }`;
 
 export default function BrandInfoPage() {
   const navigate = useNavigate();
+  const headerRef = useRef<HTMLElement>(null);
+  const mainRef = useRef<HTMLDivElement>(null);
+
   const [formData, setFormData] = useState({
     fullName: "",
     role: "",
@@ -27,6 +31,11 @@ export default function BrandInfoPage() {
   const [emailVerify, setEmailVerify] = useState('idle' as 'idle' | 'sending' | 'sent' | 'verifying' | 'verified');
   const [emailVerifyMsg, setEmailVerifyMsg] = useState('');
   const [otpCode, setOtpCode] = useState('');
+
+  useEffect(() => {
+    gsap.fromTo(headerRef.current, { y: -20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" });
+    gsap.fromTo(mainRef.current, { y: 28, opacity: 0 }, { y: 0, opacity: 1, duration: 0.65, ease: "power2.out", delay: 0.2 });
+  }, []);
 
   const sendEmailOtp = async (email: string) => {
     setEmailVerify('sending');
@@ -96,7 +105,6 @@ export default function BrandInfoPage() {
   const validate = () => {
     const e: Record<string, string> = {};
 
-    // Full name: letters, spaces, dots, hyphens only — no numbers
     if (!formData.fullName.trim()) {
       e.fullName = "Full name is required.";
     } else if (!/^[a-zA-Z\s.\-']+$/.test(formData.fullName.trim())) {
@@ -117,12 +125,10 @@ export default function BrandInfoPage() {
           : "Please verify your email to continue.";
     }
 
-    // Phone: India only
     const phoneDigits = formData.phone.replace(/\D/g, "");
     let phoneCore = phoneDigits;
     let phoneCountry = "";
 
-    // India: +91XXXXXXXXXX (12), 0XXXXXXXXXX (11), XXXXXXXXXX (10)
     if (phoneDigits.length === 12 && phoneDigits.startsWith("91") && /^[6-9]/.test(phoneDigits.slice(2))) {
       phoneCore = phoneDigits.slice(2); phoneCountry = "IN";
     } else if (phoneDigits.length === 11 && phoneDigits.startsWith("0") && /^[6-9]/.test(phoneDigits.slice(1))) {
@@ -142,7 +148,6 @@ export default function BrandInfoPage() {
       e.phone = "Please enter a real mobile number.";
     }
 
-    // Brand name: must contain letters, 2–100 chars
     if (!formData.brandName.trim()) {
       e.brandName = "Brand name is required.";
     } else if (formData.brandName.trim().length < 2) {
@@ -153,7 +158,6 @@ export default function BrandInfoPage() {
       e.brandName = "Brand name must contain at least some letters.";
     }
 
-    // Shopify URL: must start with https://, valid domain, max 200 chars
     const shopifyTrimmed = formData.shopifyUrl.trim();
     const domainRegex = /^https:\/\/(([a-zA-Z0-9][a-zA-Z0-9\-]*\.)+[a-zA-Z]{2,})(\/[^\s]{0,200})?$/;
     if (!shopifyTrimmed) {
@@ -207,7 +211,6 @@ export default function BrandInfoPage() {
       return;
     }
 
-    // Normalise phone to digits only before saving
     const cleanedPhone = formData.phone.replace(/\D/g, "");
     const cleanedData = { ...formData, phone: cleanedPhone };
 
@@ -228,7 +231,6 @@ export default function BrandInfoPage() {
           try { localStorage.setItem('companyId', String(data.companyId)); } catch {}
           navigate("/connect-or-manual");
         } else if (data && data.field) {
-          // Backend field-level error (e.g. invalid phone)
           setErrors((prev) => ({ ...prev, [data.field]: data.message }));
         } else {
           navigate("/connect-or-manual");
@@ -238,254 +240,271 @@ export default function BrandInfoPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8f6f3]">
-      <header className="px-4 py-4 md:px-12 md:py-6">
+    <div className="min-h-screen bg-[#F5F3EF]">
+      <header
+        ref={headerRef}
+        className="flex justify-between items-center px-6 py-5 md:px-16 md:py-6 border-b border-[#E8E3DA] bg-[#F5F3EF]/80 backdrop-blur-sm"
+      >
         <Logo />
       </header>
 
-      <main className="px-4 py-8 md:px-12 md:py-16 max-w-3xl mx-auto">
-        <div className="text-sm text-[#999] mb-6">01 · WHO ARE WE BENCHMARKING?</div>
+      <main ref={mainRef} className="px-6 py-10 md:px-16 md:py-16 max-w-3xl mx-auto">
+        {/* Step indicator */}
+        <div className="inline-flex items-center gap-2 mb-8">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#14b8a6]" />
+          <span className="text-xs text-[#14b8a6] font-semibold tracking-[0.16em] uppercase">
+            01 · Who are we benchmarking?
+          </span>
+        </div>
 
-        <h1 className="text-3xl md:text-5xl mb-4">Tell us about your brand.</h1>
-        <p className="text-[#666] text-base md:text-lg mb-8 md:mb-12">
+        <h1
+          className="text-3xl md:text-5xl text-[#0a1f3d] mb-4 leading-tight"
+          style={{ fontFamily: "'Playfair Display', serif" }}
+        >
+          Tell us about your brand.
+        </h1>
+        <p className="text-[#6B7280] text-base md:text-lg mb-10 leading-relaxed max-w-xl">
           We use this to send your benchmark report and connect you with the right
-          <br />
           person on our team if you want a deeper diagnostic.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-          {/* Row 1 — Name + Role */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {/* Card wrapper */}
+          <div className="bg-white border border-[#E8E3DA] rounded-2xl p-6 md:p-8 space-y-6 shadow-sm">
+
+            {/* Row 1 — Name + Role */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-xs font-semibold text-[#6B7280] tracking-[0.12em] uppercase mb-2">
+                  Full Name <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="Rohan Kapoor"
+                  value={formData.fullName}
+                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                  onBlur={() => handleBlur("fullName")}
+                  className={inputClass(errors.fullName)}
+                />
+                {errors.fullName && <p className="text-red-400 text-xs mt-1.5">{errors.fullName}</p>}
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-[#6B7280] tracking-[0.12em] uppercase mb-2">
+                  Role <span className="text-red-400">*</span>
+                </label>
+                <select
+                  value={formData.role}
+                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                  onBlur={() => handleBlur("role")}
+                  className={inputClass(errors.role) + " appearance-none"}
+                >
+                  <option value="">Select your role</option>
+                  <option value="Founder/CEO">Founder/CEO</option>
+                  <option value="Co-Founder">Co-Founder</option>
+                  <option value="Head Of Growth">Head Of Growth</option>
+                  <option value="Head of E-Commerce">Head of E-Commerce</option>
+                  <option value="Marketing Lead">Marketing Lead</option>
+                  <option value="Operational Lead">Operational Lead</option>
+                  <option value="Other">Other</option>
+                </select>
+                {errors.role && <p className="text-red-400 text-xs mt-1.5">{errors.role}</p>}
+              </div>
+            </div>
+
+            {/* Row 2 — Email + Phone */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-xs font-semibold text-[#6B7280] tracking-[0.12em] uppercase mb-2">
+                  Work Email <span className="text-red-400">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="email"
+                    placeholder="rohan@yourbrand.com"
+                    value={formData.email}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      setFormData((prev: typeof formData) => ({ ...prev, email: e.target.value }));
+                      setEmailVerify('idle');
+                      setOtpCode('');
+                      setEmailVerifyMsg('');
+                    }}
+                    onBlur={() => handleBlur("email")}
+                    className={inputClass(errors.email) + " pr-10"}
+                  />
+                  {emailVerify === 'sending' && (
+                    <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#14b8a6] animate-spin" />
+                  )}
+                  {emailVerify === 'verified' && (
+                    <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#14b8a6]" />
+                  )}
+                </div>
+                {emailVerify === 'sending' && (
+                  <p className="text-xs text-[#9CA3AF] mt-1.5">Sending verification code…</p>
+                )}
+                {emailVerify === 'verified' && (
+                  <p className="text-xs text-[#14b8a6] mt-1.5">Email verified.</p>
+                )}
+                {(emailVerify === 'sent' || emailVerify === 'verifying') && (
+                  <div className="mt-2">
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={6}
+                      placeholder="Enter 6-digit code"
+                      value={otpCode}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        const val = e.target.value.replace(/\D/g, "").slice(0, 6);
+                        setOtpCode(val);
+                        if (val.length === 6) checkOtp(formData.email.trim(), val);
+                      }}
+                      className={inputClass(emailVerifyMsg)}
+                    />
+                    {emailVerify === 'verifying' && (
+                      <p className="text-xs text-[#9CA3AF] mt-1.5">Verifying…</p>
+                    )}
+                    {emailVerifyMsg && (
+                      <p className="text-red-400 text-xs mt-1.5">{emailVerifyMsg}</p>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => { setOtpCode(''); setEmailVerifyMsg(''); sendEmailOtp(formData.email.trim()); }}
+                      className="text-xs text-[#14b8a6] hover:underline mt-1.5"
+                    >
+                      Resend code
+                    </button>
+                  </div>
+                )}
+                {errors.email && emailVerify !== 'verified' && (
+                  <p className="text-red-400 text-xs mt-1.5">{errors.email}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-[#6B7280] tracking-[0.12em] uppercase mb-2">
+                  Phone <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  inputMode="tel"
+                  placeholder="9876543210"
+                  value={formData.phone}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/[^\d+\s\-]/g, "").slice(0, 16);
+                    setFormData((prev) => ({ ...prev, phone: val }));
+                  }}
+                  onBlur={() => handleBlur("phone")}
+                  className={inputClass(errors.phone)}
+                />
+                {errors.phone && <p className="text-red-400 text-xs mt-1.5">{errors.phone}</p>}
+              </div>
+            </div>
+
+            {/* Brand Name */}
             <div>
-              <label className="block text-sm text-[#666] mb-2">
-                FULL NAME <span className="text-red-500">*</span>
+              <label className="block text-xs font-semibold text-[#6B7280] tracking-[0.12em] uppercase mb-2">
+                Brand Name <span className="text-red-400">*</span>
               </label>
               <input
                 type="text"
-                placeholder="Rohan Kapoor"
-                value={formData.fullName}
-                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                onBlur={() => handleBlur("fullName")}
-                className={inputClass(errors.fullName)}
+                placeholder="Your D2C brand"
+                value={formData.brandName}
+                onChange={(e) => setFormData({ ...formData, brandName: e.target.value })}
+                onBlur={() => handleBlur("brandName")}
+                className={inputClass(errors.brandName)}
               />
-              {errors.fullName && <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>}
+              {errors.brandName && <p className="text-red-400 text-xs mt-1.5">{errors.brandName}</p>}
             </div>
-            <div>
-              <label className="block text-sm text-[#666] mb-2">
-                ROLE <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={formData.role}
-                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                onBlur={() => handleBlur("role")}
-                className={inputClass(errors.role) + " appearance-none"}
-              >
-                <option value="">Select your role</option>
-                <option value="Founder/CEO">Founder/CEO</option>
-                <option value="Co-Founder">Co-Founder</option>
-                <option value="Head Of Growth">Head Of Growth</option>
-                <option value="Head of E-Commerce">Head of E-Commerce</option>
-                <option value="Marketing Lead">Marketing Lead</option>
-                <option value="Operational Lead">Operational Lead</option>
-                <option value="Other">Other</option>
-              </select>
-              {errors.role && <p className="text-red-500 text-xs mt-1">{errors.role}</p>}
-            </div>
-          </div>
 
-          {/* Row 2 — Email + Phone */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {/* Shopify URL */}
             <div>
-              <label className="block text-sm text-[#666] mb-2">
-                WORK EMAIL <span className="text-red-500">*</span>
+              <label className="block text-xs font-semibold text-[#6B7280] tracking-[0.12em] uppercase mb-2">
+                Shopify Store URL <span className="text-red-400">*</span>
               </label>
               <div className="relative">
                 <input
-                  type="email"
-                  placeholder="rohan@yourbrand.com"
-                  value={formData.email}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    setFormData((prev: typeof formData) => ({ ...prev, email: e.target.value }));
-                    setEmailVerify('idle');
-                    setOtpCode('');
-                    setEmailVerifyMsg('');
+                  type="text"
+                  placeholder="https://yourbrand.com"
+                  value={formData.shopifyUrl}
+                  onChange={(e) => {
+                    setFormData({ ...formData, shopifyUrl: e.target.value });
+                    setShopifyVerify('idle');
+                    setShopifyVerifyMsg('');
                   }}
-                  onBlur={() => handleBlur("email")}
-                  className={inputClass(errors.email) + " pr-10"}
+                  onBlur={() => handleBlur("shopifyUrl")}
+                  className={inputClass(errors.shopifyUrl) + " pr-10"}
                 />
-                {emailVerify === 'sending' && (
-                  <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#999] animate-spin" />
+                {shopifyVerify === 'checking' && (
+                  <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#14b8a6] animate-spin" />
                 )}
-                {emailVerify === 'verified' && (
-                  <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-500" />
+                {shopifyVerify === 'valid' && (
+                  <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#14b8a6]" />
+                )}
+                {shopifyVerify === 'invalid' && (
+                  <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-red-400" />
                 )}
               </div>
-              {emailVerify === 'sending' && (
-                <p className="text-xs text-[#999] mt-1">Sending verification code…</p>
-              )}
-              {emailVerify === 'verified' && (
-                <p className="text-xs text-green-600 mt-1">Email verified.</p>
-              )}
-              {(emailVerify === 'sent' || emailVerify === 'verifying') && (
-                <div className="mt-2">
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={6}
-                    placeholder="Enter 6-digit code"
-                    value={otpCode}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      const val = e.target.value.replace(/\D/g, "").slice(0, 6);
-                      setOtpCode(val);
-                      if (val.length === 6) checkOtp(formData.email.trim(), val);
-                    }}
-                    className={inputClass(emailVerifyMsg)}
-                  />
-                  {emailVerify === 'verifying' && (
-                    <p className="text-xs text-[#999] mt-1">Verifying…</p>
-                  )}
-                  {emailVerifyMsg && (
-                    <p className="text-red-500 text-xs mt-1">{emailVerifyMsg}</p>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => { setOtpCode(''); setEmailVerifyMsg(''); sendEmailOtp(formData.email.trim()); }}
-                    className="text-xs text-[#666] underline mt-1"
-                  >
-                    Resend code
-                  </button>
-                </div>
-              )}
-              {errors.email && emailVerify !== 'verified' && (
-                <p className="text-red-500 text-xs mt-1">{errors.email}</p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm text-[#666] mb-2">
-                PHONE <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                inputMode="tel"
-                placeholder="9876543210"
-                value={formData.phone}
-                onChange={(e) => {
-                  const val = e.target.value.replace(/[^\d+\s\-]/g, "").slice(0, 16);
-                  setFormData((prev) => ({ ...prev, phone: val }));
-                }}
-                onBlur={() => handleBlur("phone")}
-                className={inputClass(errors.phone)}
-              />
-              {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
-            </div>
-          </div>
-
-          {/* Brand Name */}
-          <div>
-            <label className="block text-sm text-[#666] mb-2">
-              BRAND NAME <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              placeholder="Your D2C brand"
-              value={formData.brandName}
-              onChange={(e) => setFormData({ ...formData, brandName: e.target.value })}
-              onBlur={() => handleBlur("brandName")}
-              className={inputClass(errors.brandName)}
-            />
-            {errors.brandName && <p className="text-red-500 text-xs mt-1">{errors.brandName}</p>}
-          </div>
-
-          {/* Shopify URL */}
-          <div>
-            <label className="block text-sm text-[#666] mb-2">
-              SHOPIFY STORE URL <span className="text-red-500">*</span>
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="https://yourbrand.com"
-                value={formData.shopifyUrl}
-                onChange={(e) => {
-                  setFormData({ ...formData, shopifyUrl: e.target.value });
-                  setShopifyVerify('idle');
-                  setShopifyVerifyMsg('');
-                }}
-                onBlur={() => handleBlur("shopifyUrl")}
-                className={inputClass(errors.shopifyUrl) + " pr-10"}
-              />
               {shopifyVerify === 'checking' && (
-                <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#999] animate-spin" />
+                <p className="text-xs text-[#9CA3AF] mt-1.5">Verifying Shopify store...</p>
               )}
               {shopifyVerify === 'valid' && (
-                <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-500" />
+                <p className="text-xs text-[#14b8a6] mt-1.5">Shopify store verified.</p>
               )}
-              {shopifyVerify === 'invalid' && (
-                <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-red-500" />
-              )}
+              {errors.shopifyUrl && <p className="text-red-400 text-xs mt-1.5">{errors.shopifyUrl}</p>}
             </div>
-            {shopifyVerify === 'checking' && (
-              <p className="text-xs text-[#999] mt-1">Verifying Shopify store...</p>
-            )}
-            {shopifyVerify === 'valid' && (
-              <p className="text-xs text-green-600 mt-1">Shopify store verified.</p>
-            )}
 
-            {errors.shopifyUrl && <p className="text-red-500 text-xs mt-1">{errors.shopifyUrl}</p>}
+            {/* Category + Orders per month */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-xs font-semibold text-[#6B7280] tracking-[0.12em] uppercase mb-2">
+                  Category <span className="text-red-400">*</span>
+                </label>
+                <select
+                  value={formData.category}
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  onBlur={() => handleBlur("category")}
+                  className={inputClass(errors.category) + " appearance-none"}
+                >
+                  <option value="">Select category</option>
+                  <option value="Food & Beverage">Food & Beverage</option>
+                  <option value="Wellness & Supplements">Wellness & Supplements</option>
+                  <option value="Other">Other</option>
+                </select>
+                {errors.category && <p className="text-red-400 text-xs mt-1.5">{errors.category}</p>}
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-[#6B7280] tracking-[0.12em] uppercase mb-2">
+                  Orders Per Month <span className="text-red-400">*</span>
+                </label>
+                <select
+                  value={formData.ordersPerMonth}
+                  onChange={(e) => setFormData({ ...formData, ordersPerMonth: e.target.value })}
+                  onBlur={() => handleBlur("ordersPerMonth")}
+                  className={inputClass(errors.ordersPerMonth) + " appearance-none"}
+                >
+                  <option value="">Select range</option>
+                  <option value="Under 500">Under 500</option>
+                  <option value="500 to 2000">500 to 2,000</option>
+                  <option value="2000 to 5000">2,000 to 5,000</option>
+                  <option value="5000 to 15000">5,000 to 15,000</option>
+                  <option value="15000 to 50000">15,000 to 50,000</option>
+                  <option value="Over 50000">Over 50,000</option>
+                </select>
+                {errors.ordersPerMonth && <p className="text-red-400 text-xs mt-1.5">{errors.ordersPerMonth}</p>}
+              </div>
+            </div>
+
           </div>
 
-          {/* Category + Orders per month */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm text-[#666] mb-2">
-                CATEGORY <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                onBlur={() => handleBlur("category")}
-                className={inputClass(errors.category) + " appearance-none"}
-              >
-                <option value="">Select category</option>
-                <option value="Food & Beverage">Food & Beverage</option>
-                <option value="Wellness & Supplements">Wellness & Supplements</option>
-                <option value="Other">Other</option>
-              </select>
-              {errors.category && <p className="text-red-500 text-xs mt-1">{errors.category}</p>}
-            </div>
-            <div>
-              <label className="block text-sm text-[#666] mb-2">
-                ORDERS PER MONTH <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={formData.ordersPerMonth}
-                onChange={(e) => setFormData({ ...formData, ordersPerMonth: e.target.value })}
-                onBlur={() => handleBlur("ordersPerMonth")}
-                className={inputClass(errors.ordersPerMonth) + " appearance-none"}
-              >
-                <option value="">Select range</option>
-                <option value="Under 500">Under 500</option>
-                <option value="500 to 2000">500 to 2,000</option>
-                <option value="2000 to 5000">2,000 to 5,000</option>
-                <option value="5000 to 15000">5,000 to 15,000</option>
-                <option value="15000 to 50000">15,000 to 50,000</option>
-                <option value="Over 50000">Over 50,000</option>
-              </select>
-              {errors.ordersPerMonth && <p className="text-red-500 text-xs mt-1">{errors.ordersPerMonth}</p>}
-            </div>
-          </div>
-
-          {/* Warning */}
-          <div className="flex gap-3 p-4 bg-[#fff4e6] border border-[#ffd699] rounded-lg">
-            <AlertCircle className="w-5 h-5 text-[#ff9800] flex-shrink-0 mt-0.5" />
-            <p className="text-sm text-[#666]">
+          {/* Privacy notice */}
+          <div className="flex gap-3 p-4 bg-white border border-[#E8E3DA] rounded-xl">
+            <AlertCircle className="w-4 h-4 text-[#14b8a6] flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-[#6B7280]">
               Your data stays anonymous in benchmarks. We never resell or expose individual brand metrics.
             </p>
           </div>
 
           <button
             type="submit"
-            className="w-full bg-[#1a1a1a] text-white px-8 py-4 rounded-lg hover:bg-[#333] transition-colors"
+            className="w-full bg-[#0a1f3d] text-white px-8 py-4 rounded-xl hover:bg-[#162d57] transition-all duration-200 font-medium tracking-wide shadow-lg shadow-black/10 hover:shadow-xl"
           >
             Continue
           </button>
