@@ -4,6 +4,7 @@ import Logo from "../components/Logo";
 import cohortConfig from "../utils/cohortConfig";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { resizeLenis } from "../utils/lenisInstance";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -47,6 +48,7 @@ export default function MethodologyPage() {
       }
     });
 
+    setTimeout(resizeLenis, 100);
     return () => ctx.revert();
   }, []);
 
