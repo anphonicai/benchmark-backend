@@ -970,6 +970,43 @@
     .alchemy-portfolio-logo-item:nth-last-child(-n+2) { border-bottom: none; }
   }
 
+  /* ─── PRINT / SAVE AS PDF ─── */
+  @media print {
+    /* Hide everything on the page */
+    body * { visibility: hidden; }
+
+    /* Show only the scorecard overlay and its contents */
+    #scorecardOverlay,
+    #scorecardOverlay * { visibility: visible; }
+
+    /* Reposition overlay so it starts at top-left, not fixed */
+    #scorecardOverlay {
+      position: absolute !important;
+      inset: 0 !important;
+      background: white !important;
+      backdrop-filter: none !important;
+      padding: 0 !important;
+      overflow: visible !important;
+    }
+
+    .scorecard-overlay-inner {
+      max-width: 640px !important;
+      margin: 0 auto !important;
+    }
+
+    /* Hide UI controls that shouldn't appear in PDF */
+    .scorecard-close-bar,
+    .sc-print-btn { visibility: hidden !important; }
+
+    /* Keep the card on one page */
+    .sc-embed .sc-card {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    @page { margin: 1.5cm; size: A4 portrait; }
+  }
+
 </style>
 </head>
 <body>
@@ -2495,7 +2532,15 @@ function scrollToScorecard() { openScorecardOverlay(); }
   }
 
   inputs.forEach(function(inp) {
-    inp.addEventListener('input', scUpdate);
+    inp.addEventListener('input', function() {
+      const max = parseInt(inp.dataset.max);
+      const raw = parseInt(inp.value);
+      if (!isNaN(raw) && inp.value !== '') {
+        const v = Math.min(Math.max(raw, 0), max);
+        if (v !== raw) inp.value = v;
+      }
+      scUpdate();
+    });
     inp.addEventListener('change', function() {
       const max = parseInt(inp.dataset.max);
       const raw = parseInt(inp.value);
