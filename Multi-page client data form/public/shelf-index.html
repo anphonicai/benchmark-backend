@@ -13,6 +13,9 @@
     --ink-light: #8888aa; --rule: #e2e2ee; --page: #fafaf8; --white: #ffffff;
   }
   body { font-family: 'Inter', sans-serif; background: var(--page); color: var(--ink); font-size: 15px; line-height: 1.75; }
+  html, body { overflow-x: hidden; }
+  img { max-width: 100%; }
+
 
   /* COVER */
   .cover { background: var(--navy); min-height: 100vh; display: flex; flex-direction: column; justify-content: space-between; padding: 56px 64px; position: relative; overflow: hidden; }
@@ -880,6 +883,91 @@
     .sc-embed .sc-month-row, .sc-embed .sc-score-rows,
     .sc-embed .sc-total-section, .sc-embed .sc-card-footer { padding-left: 1.5rem; padding-right: 1.5rem; }
     .sc-embed .sc-num-input { width: 56px; height: 40px; font-size: 16px; }
+  }
+
+
+  /* ═══════════════════════════════════════════════════════
+     MOBILE POLISH — additional overrides
+     ═══════════════════════════════════════════════════════ */
+
+  @media (max-width: 640px) {
+    /* Insight card */
+    .insight-card { padding: 20px; }
+    .insight-card h3 { font-size: 17px; margin: 0 0 10px; }
+
+    /* Leader cards */
+    .leader-card { padding: 18px; }
+    .leader-photo-img { width: 90px; height: 90px; }
+    .leader-name { font-size: 17px; }
+
+    /* Endorsement cards */
+    .endorsement-card { padding: 18px 20px; }
+    .endorsement-card::before { font-size: 48px; top: 4px; left: 14px; }
+    .endorsement-quote { font-size: 15px; }
+
+    /* Testimonial cards */
+    .testimonial-card { padding: 16px 18px; }
+    .testimonial-quote { font-size: 13px; }
+
+    /* Audit modal */
+    .modal-overlay { padding: 0.75rem; }
+    .audit-modal-head { padding: 1.25rem 1.5rem 1rem; }
+    .audit-modal-title { font-size: 20px; }
+    .audit-modal-body { padding: 1.25rem 1.5rem 1.5rem; }
+
+    /* Cover: hide × between logos when stacked */
+    .cover-logo-sep { display: none; }
+
+    /* Section spacing tighter */
+    .section-intro { margin: 40px 0 24px; }
+
+    /* Reorder mockup: collapse phone frame to card */
+    .reorder-phone-outer { border-radius: 20px; }
+    .reorder-col-mobile { align-items: stretch; }
+
+    /* Alchemy portfolio grid on mobile */
+    .alchemy-portfolio-logo-item { padding: 16px 18px; min-height: 72px; }
+    .alchemy-portfolio-logo-label { font-size: 9px; }
+
+    /* Publisher co-producer sep */
+    .publisher-coproducer-sep { font-size: 20px; }
+  }
+
+  @media (max-width: 480px) {
+    /* Tighter card paddings */
+    .insight-card { padding: 16px; }
+    .endorsement-card { padding: 14px 16px; }
+    .testimonial-card { padding: 14px 16px; }
+    .leader-card { padding: 16px; }
+
+    /* Scorecard tighter */
+    .sc-embed .sc-title { font-size: 1.5rem; }
+    .sc-embed .sc-card-header { padding: 1.5rem 1.25rem 1.25rem; }
+    .sc-embed .sc-month-row,
+    .sc-embed .sc-score-rows,
+    .sc-embed .sc-total-section,
+    .sc-embed .sc-card-footer { padding-left: 1.25rem; padding-right: 1.25rem; }
+    .sc-embed .sc-month-input { width: 140px; }
+
+    /* Audit modal */
+    .audit-modal-title { font-size: 18px; }
+    .audit-slot { padding: 12px 14px; }
+    .audit-slot-label { font-size: 12px; }
+
+    /* CTA */
+    .cta-section { padding: 40px 20px; }
+    .cta-section h2 { font-size: 22px; }
+    .cta-btn, .cta-btn-outline { padding: 13px 24px; font-size: 13px; }
+  }
+
+  @media (max-width: 400px) {
+    .insight-card { padding: 14px; }
+    .leader-photo-img { width: 80px; height: 80px; }
+    .endorsement-quote { font-size: 14px; }
+    .testimonial-quote { font-size: 12.5px; }
+    .alchemy-portfolio-logos { grid-template-columns: 1fr 1fr; }
+    .alchemy-portfolio-logo-item:nth-child(2n) { border-right: none; }
+    .alchemy-portfolio-logo-item:nth-last-child(-n+2) { border-bottom: none; }
   }
 
 </style>
