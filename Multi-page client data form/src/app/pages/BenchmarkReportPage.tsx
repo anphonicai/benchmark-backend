@@ -135,13 +135,20 @@ function mapReport(parsed: any, brandInfo: any): ReportData {
           verdict: m.verdict ?? "below", lowerIsBetter: m.key === "time_to_2nd_order_days",
         }))
     : defaultData.metrics;
-  const gaps: Gap[] = Array.isArray(report.gaps)
-    ? report.gaps.filter((g: any) => g.id !== "underutilised_rebuy").map((g: any) => ({
+  const rawGaps = Array.isArray(report.gaps)
+    ? report.gaps.filter((g: any) => g.id !== "underutilised_rebuy")
+    : null;
+  const gaps: Gap[] = rawGaps
+    ? rawGaps.map((g: any) => ({
         id: g.id ?? "unknown", title: g.title ?? "",
         revenueAtStake: g.revenue_at_stake_inr ? `₹${(g.revenue_at_stake_inr / 100000).toFixed(1)}L` : "",
         description: g.comparison ?? g.description ?? "", additionalInfo: g.cohort_data ?? "",
       }))
     : defaultData.gaps;
+  const gapSum = rawGaps
+    ? rawGaps.reduce((sum: number, g: any) => sum + (Number(g.revenue_at_stake_inr) || 0), 0)
+    : 0;
+  const totalRevenueAtStake = report.total_revenue_at_stake_inr || gapSum;
   const now = new Date();
   const refCode = `ABM-${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}`;
   return {
@@ -151,7 +158,7 @@ function mapReport(parsed: any, brandInfo: any): ReportData {
     verdictHeadline: report.verdict?.headline ?? defaultData.verdictHeadline,
     verdictDescription: report.verdict?.cohort_comparison ?? defaultData.verdictDescription,
     metrics, gaps,
-    totalRevenueAtStake: report.total_revenue_at_stake_inr ?? 0,
+    totalRevenueAtStake,
     refCode,
   };
 }
