@@ -1,7 +1,7 @@
 // Single source of truth for cohort numbers.
 // Update this file when Edition 02 ships — all pages update automatically.
 const cohortConfig = {
-  cohort_size: 13,
+  cohort_size: "12 and 13",
   cohort_size_label: "Leading Indian D2C brands",
   tracked_value: "₹200 Cr+",
   tracked_value_label: "Tracked transactions",
