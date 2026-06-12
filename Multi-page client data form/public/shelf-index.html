@@ -979,17 +979,13 @@
 
   /* ─── PRINT / SAVE AS PDF ─── */
   @media print {
-    /* Hide everything on the page */
-    body * { visibility: hidden; }
+    /* Remove all other content from layout — display:none eliminates pages, visibility:hidden does not */
+    body > *:not(#scorecardOverlay) { display: none !important; }
 
-    /* Show only the scorecard overlay and its contents */
-    #scorecardOverlay,
-    #scorecardOverlay * { visibility: visible; }
-
-    /* Reposition overlay so it starts at top-left, not fixed */
+    /* Make overlay a normal block, not fixed */
     #scorecardOverlay {
-      position: absolute !important;
-      inset: 0 !important;
+      display: block !important;
+      position: static !important;
       background: white !important;
       backdrop-filter: none !important;
       padding: 0 !important;
@@ -997,21 +993,23 @@
     }
 
     .scorecard-overlay-inner {
-      max-width: 640px !important;
+      max-width: 600px !important;
       margin: 0 auto !important;
+      box-shadow: none !important;
     }
 
-    /* Hide UI controls that shouldn't appear in PDF */
+    /* Hide UI controls */
     .scorecard-close-bar,
-    .sc-print-btn { visibility: hidden !important; }
+    .sc-print-btn { display: none !important; }
 
-    /* Keep the card on one page */
+    /* No breaks inside the card */
     .sc-embed .sc-card {
       break-inside: avoid;
       page-break-inside: avoid;
+      box-shadow: none !important;
     }
 
-    @page { margin: 1.5cm; size: A4 portrait; }
+    @page { margin: 1cm; size: A4 portrait; }
   }
 
 </style>
