@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Link } from "react-router";
+
 import Logo from "../components/Logo";
 import cohortConfig from "../utils/cohortConfig";
 import { resizeLenis } from "../utils/lenisInstance";
@@ -659,12 +659,15 @@ export default function BenchmarkReportPage() {
               Book a 20-minute diagnostic
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </button>
-            <Link
-              to="/"
+            <a
+              href="/shelf-index.html"
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-8 py-4 rounded-xl border border-[#DDD8CF] text-[#555] hover:border-[#14b8a6] hover:text-[#14b8a6] transition-all font-medium text-sm bg-white/50 hover:bg-white"
             >
-              Back to home
-            </Link>
+              <ExternalLink className="w-4 h-4" />
+              View Shelf Index
+            </a>
           </div>
 
           <p className="text-[11px] tracking-widest uppercase text-[#C0BAB0]">
