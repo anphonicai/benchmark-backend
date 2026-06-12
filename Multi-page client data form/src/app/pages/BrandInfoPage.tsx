@@ -84,6 +84,14 @@ export default function BrandInfoPage() {
     }
   };
 
+  const normalizeUrl = (raw: string): string => {
+    const t = raw.trim();
+    if (!t) return t;
+    if (t.startsWith('https://')) return t;
+    if (t.startsWith('http://')) return 'https://' + t.slice(7);
+    return 'https://' + t;
+  };
+
   const verifyShopifyUrl = async (url: string) => {
     setShopifyVerify('checking');
     setShopifyVerifyMsg('');
@@ -160,14 +168,14 @@ export default function BrandInfoPage() {
       e.brandName = "Brand name must contain at least some letters.";
     }
 
-    const shopifyTrimmed = formData.shopifyUrl.trim();
+    const shopifyTrimmed = normalizeUrl(formData.shopifyUrl.trim());
     const domainRegex = /^https:\/\/(([a-zA-Z0-9][a-zA-Z0-9\-]*\.)+[a-zA-Z]{2,})(\/[^\s]{0,200})?$/;
-    if (!shopifyTrimmed) {
+    if (!formData.shopifyUrl.trim()) {
       e.shopifyUrl = "Shopify store URL is required.";
     } else if (shopifyTrimmed.length > 200) {
-      e.shopifyUrl = "URL is too long. Please enter your store's main domain (e.g. https://yourbrand.com).";
+      e.shopifyUrl = "URL is too long. Please enter your store's main domain (e.g. yourbrand.com).";
     } else if (!domainRegex.test(shopifyTrimmed)) {
-      e.shopifyUrl = "Please enter a valid URL starting with https:// (e.g. https://yourbrand.com).";
+      e.shopifyUrl = "Please enter a valid domain (e.g. yourbrand.com or www.yourbrand.com).";
     } else if (shopifyVerify === 'invalid') {
       e.shopifyUrl = shopifyVerifyMsg || "This does not appear to be a Shopify store.";
     } else if (shopifyVerify === 'idle' || shopifyVerify === 'checking') {
@@ -190,10 +198,10 @@ export default function BrandInfoPage() {
       }
     }
     if (field === 'shopifyUrl') {
-      const trimmed = formData.shopifyUrl.trim();
+      const normalized = normalizeUrl(formData.shopifyUrl.trim());
       const domainRegex = /^https:\/\/(([a-zA-Z0-9][a-zA-Z0-9\-]*\.)+[a-zA-Z]{2,})(\/[^\s]{0,200})?$/;
-      if (trimmed && domainRegex.test(trimmed) && shopifyVerify === 'idle') {
-        verifyShopifyUrl(trimmed);
+      if (normalized && domainRegex.test(normalized) && shopifyVerify === 'idle') {
+        verifyShopifyUrl(normalized);
         return;
       }
     }
@@ -218,7 +226,7 @@ export default function BrandInfoPage() {
     }
 
     const cleanedPhone = formData.phone.replace(/\D/g, "");
-    const cleanedData = { ...formData, phone: cleanedPhone };
+    const cleanedData = { ...formData, phone: cleanedPhone, shopifyUrl: normalizeUrl(formData.shopifyUrl.trim()) };
 
     try {
       localStorage.setItem('brandInfo', JSON.stringify(cleanedData));
@@ -428,7 +436,7 @@ export default function BrandInfoPage() {
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="https://yourbrand.com"
+                  placeholder="yourbrand.com or www.yourbrand.com"
                   value={formData.shopifyUrl}
                   onChange={(e) => {
                     setFormData({ ...formData, shopifyUrl: e.target.value });
