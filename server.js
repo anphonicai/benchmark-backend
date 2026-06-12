@@ -263,6 +263,39 @@ Be concise. Explain metrics simply. Keep answers under 80 words. Don't use bulle
   }
 });
 
+// robots.txt
+app.get('/robots.txt', (req, res) => {
+  res.type('text/plain');
+  res.send(`User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /brand-info
+Disallow: /connect-or-manual
+Disallow: /shopify-connect
+Disallow: /manual-entry
+Disallow: /benchmark-report
+
+Sitemap: https://benchmark.anphonic.ai/sitemap.xml`);
+});
+
+// sitemap.xml
+app.get('/sitemap.xml', (req, res) => {
+  res.type('application/xml');
+  res.send(`<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://benchmark.anphonic.ai/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://benchmark.anphonic.ai/methodology</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+</urlset>`);
+});
+
 // Serve the Vite frontend build (outputs to client/ via vite.config.ts outDir)
 const frontendBuildPath = path.join(__dirname, 'client');
 if (fs.existsSync(path.join(frontendBuildPath, 'index.html'))) {
