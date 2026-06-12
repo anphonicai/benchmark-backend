@@ -285,11 +285,12 @@ export default function BenchmarkReportPage() {
           <Logo variant="dark" />
           <a
             href="/shelf-index.html"
-            download="The_Shelf_Index_Edition01.html"
+            target="_blank"
+            rel="noopener noreferrer"
             className="text-xs tracking-widest border px-4 py-2 rounded transition-opacity hover:opacity-70"
             style={{ color: TEAL, borderColor: TEAL }}
           >
-            DOWNLOAD SHELF INDEX
+            VIEW SHELF INDEX
           </a>
         </div>
 
@@ -485,11 +486,12 @@ export default function BenchmarkReportPage() {
             </button>
             <a
               href="/shelf-index.html"
-              download="The_Shelf_Index_Edition01.html"
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-8 py-4 rounded-lg font-medium border hover:opacity-70 transition-opacity"
               style={{ color: NAVY, borderColor: NAVY }}
             >
-              Download The Shelf Index
+              View The Shelf Index
             </a>
           </div>
 
