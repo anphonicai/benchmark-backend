@@ -8,6 +8,7 @@ import ShopifyConnectionPage from "./pages/ShopifyConnectionPage";
 import ManualDataEntryPage from "./pages/ManualDataEntryPage";
 import BenchmarkReportPage from "./pages/BenchmarkReportPage";
 import MethodologyPage from "./pages/MethodologyPage";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 
 function ScrollReset() {
   const { pathname } = useLocation();
@@ -28,6 +29,7 @@ export const router = createBrowserRouter([
       { path: "/manual-entry", Component: ManualDataEntryPage },
       { path: "/benchmark-report", Component: BenchmarkReportPage },
       { path: "/methodology", Component: MethodologyPage },
+      { path: "/privacy", Component: PrivacyPolicyPage },
     ],
   },
 ]);
