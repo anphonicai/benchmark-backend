@@ -448,17 +448,17 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="px-6 md:px-16 py-8 border-t border-[#E8E3DA] bg-[#F5F3EF]">
         <div className="max-w-[1200px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-xs text-[#C0BAB0]">
+          <p className="text-xs text-[#4B5563]">
             © {new Date().getFullYear()} Anphonic AI. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
-            <Link to="/privacy" className="text-xs text-[#C0BAB0] hover:text-[#14b8a6] transition-colors">
+            <Link to="/privacy" className="text-xs text-[#4B5563] hover:text-[#14b8a6] transition-colors">
               Privacy Policy
             </Link>
-            <Link to="/methodology" className="text-xs text-[#C0BAB0] hover:text-[#14b8a6] transition-colors">
+            <Link to="/methodology" className="text-xs text-[#4B5563] hover:text-[#14b8a6] transition-colors">
               Methodology
             </Link>
-            <a href="mailto:merchants@anphonic.ai" className="text-xs text-[#C0BAB0] hover:text-[#14b8a6] transition-colors">
+            <a href="mailto:merchants@anphonic.ai" className="text-xs text-[#4B5563] hover:text-[#14b8a6] transition-colors">
               Contact
             </a>
           </div>
