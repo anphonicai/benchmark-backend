@@ -194,11 +194,12 @@ export default function HomePage() {
             {/* Badge */}
             <div
               ref={badgeRef}
-              className="inline-flex items-center gap-3 px-4 py-2 border border-[#DDD8CF] rounded-full mb-10 bg-white/70 backdrop-blur-sm shadow-sm"
+              className="inline-flex items-center gap-3 px-4 py-2 border border-[#a8dbd8] rounded-full mb-10 bg-[#e6faf9] shadow-sm"
             >
-              <span className="text-[#999] text-xs tracking-[0.16em] font-medium">THE SHELF INDEX</span>
-              <span className="text-[#DDD] font-thin text-lg leading-none">|</span>
-              <span className="text-[#999] text-xs tracking-[0.16em] font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#14b8a6]" />
+              <span className="text-[#14b8a6] text-xs tracking-[0.16em] font-semibold">THE SHELF INDEX</span>
+              <span className="text-[#a8dbd8] font-thin text-lg leading-none">|</span>
+              <span className="text-[#14b8a6] text-xs tracking-[0.16em] font-semibold">
                 INDIA D2C {cohortConfig.data_window_year}
               </span>
             </div>
