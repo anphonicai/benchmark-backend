@@ -9,7 +9,7 @@ const cohortConfig = {
   data_window_year: "2026",
   data_window_label: "Data window",
   data_window_full: "Jan–April 2026",
-  categories: "F&B, Beauty, Wellness, Fashion, Home, Pet, Jewelry",
+  categories: "F&B, Wellness",
   source: "The Shelf Index",
   edition: "Edition 01 · Anphonic, 2026",
 };

@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { Link } from "react-router";
 import Logo from "../components/Logo";
 import gsap from "gsap";
+import { resizeLenis } from "../utils/lenisInstance";
 
 const TEAL = "#14b8a6";
 const NAVY = "#0a1f3d";
@@ -187,6 +188,7 @@ export default function PrivacyPolicyPage() {
         );
       }
     });
+    setTimeout(resizeLenis, 100);
     return () => ctx.revert();
   }, []);
 
