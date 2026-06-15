@@ -74,6 +74,13 @@ export default function ManualDataEntryPage() {
       .then((res) => res.json())
       .then((data) => {
         if (data && data.success) {
+          (window as any).gtag?.("event", "benchmark_complete", {
+            event_category: "benchmark",
+            method: "manual",
+            shelf_score: data.shelf_score,
+            percentile: data.percentile,
+            category: data.category_used,
+          });
           try {
             if (data.companyId) localStorage.setItem('lastCompanyId', String(data.companyId));
             localStorage.setItem('lastReport', JSON.stringify(data));

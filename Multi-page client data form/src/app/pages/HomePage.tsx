@@ -240,7 +240,10 @@ export default function HomePage() {
             <div ref={ctaRef} className="flex flex-col gap-5">
               <div className="flex flex-wrap gap-3">
                 <button
-                  onClick={() => navigate("/brand-info")}
+                  onClick={() => {
+                    (window as any).gtag?.("event", "benchmark_start", { event_category: "benchmark", event_label: "homepage_cta" });
+                    navigate("/brand-info");
+                  }}
                   className="group bg-[#0a1f3d] text-white px-7 py-3.5 rounded-xl hover:bg-[#162d57] transition-all duration-200 flex items-center gap-2 hover:gap-3 shadow-lg shadow-black/10 hover:shadow-xl hover:shadow-black/15 font-medium text-sm"
                 >
                   <span>Start free benchmark</span>

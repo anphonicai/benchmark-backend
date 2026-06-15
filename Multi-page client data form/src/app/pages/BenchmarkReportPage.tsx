@@ -660,7 +660,10 @@ export default function BenchmarkReportPage() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
             <button
-              onClick={() => setShowCalModal(true)}
+              onClick={() => {
+                (window as any).gtag?.("event", "cta_click", { event_category: "conversion", event_label: "book_diagnostic", shelf_score: data.shelfScore });
+                setShowCalModal(true);
+              }}
               className="group inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-[#0a1f3d] text-white font-medium hover:bg-[#162d57] transition-all shadow-lg shadow-black/10 hover:shadow-xl hover:shadow-black/15 text-sm"
             >
               Book a 20-minute diagnostic
