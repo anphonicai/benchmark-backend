@@ -66,10 +66,7 @@ const generateShelfIndexPdf = async () => {
   // 2. Strip <?xml?> declaration (invalid inside HTML)
   // 3. Convert class-based fills → inline fill attributes so the page's own
   //    CSS (which may define .cls-1 etc. differently) can't override logo colours
-  const logoSvgPath = path.join(
-    __dirname,
-    '../Multi-page client data form/src/imports/Anphonic-logo_with_bg_-_white.svg'
-  );
+  const logoSvgPath = path.join(__dirname, '../client/anphonic-logo-white-bg.svg');
   const logoSvgRaw = fs.readFileSync(logoSvgPath, 'utf8');
   const logoSvgContent = logoSvgRaw
     .replace(/<\?xml[^?]*\?>\s*/i, '')

@@ -52,6 +52,10 @@ COPY db/    ./db/
 # Copy compiled frontend from stage 1
 COPY --from=frontend-builder /build/client/ ./client/
 
+# Copy Anphonic logo SVG used by PDF generator (client/ is gitignored so
+# we copy the source asset directly — it resolves to client/anphonic-logo-white-bg.svg at runtime)
+COPY ["Multi-page client data form/src/imports/Anphonic-logo_with_bg_-_white.svg", "./client/anphonic-logo-white-bg.svg"]
+
 ENV PORT=8080
 ENV NODE_ENV=production
 
