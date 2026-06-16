@@ -56,7 +56,7 @@ const launchBrowser = async () => {
     });
   }
 
-  const chromium = require('@sparticuz/chromium');
+  const chromium = require('@sparticuz/chromium').default;
   return puppeteer.launch({
     args: chromium.args,
     defaultViewport: chromium.defaultViewport,
