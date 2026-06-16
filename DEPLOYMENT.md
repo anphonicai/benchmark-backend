@@ -45,6 +45,8 @@ git push origin main
   --source /Users/akshita/Documents/benchmark-backend \
   --region asia-south1 \
   --project daring-charmer-498305-e7 \
+  --memory 2Gi \
+  --no-cpu-throttling \
   --quiet
 ```
 
@@ -54,7 +56,11 @@ This command:
 3. Deploys a new revision to Cloud Run
 4. Shifts 100% of traffic to the new revision automatically
 
-Takes about **2–3 minutes** to complete.
+**Flags explained:**
+- `--memory 2Gi` — required for Puppeteer/Chromium PDF generation (default 512MB is not enough)
+- `--no-cpu-throttling` — keeps CPU allocated after each request so background PDF generation (which runs after the API response is sent) isn't starved and killed
+
+Takes about **3–5 minutes** to complete.
 
 ---
 
@@ -129,6 +135,8 @@ git push origin main
   --source /Users/akshita/Documents/benchmark-backend \
   --region asia-south1 \
   --project daring-charmer-498305-e7 \
+  --memory 2Gi \
+  --no-cpu-throttling \
   --quiet
 curl https://benchmark.anphonic.ai/health
 ```
