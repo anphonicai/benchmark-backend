@@ -169,4 +169,64 @@ export const blogPosts: BlogPost[] = [
       },
     ],
   },
+  {
+    slug: "four-funnel-leaks-d2c-brands-2026",
+    title: "The 4 Funnel Leaks That Separate Average D2C Brands from Top Performers",
+    metaDescription:
+      "Explore the four most common funnel leaks in Indian D2C, how benchmark leaders close them, and what brands should fix first to improve Shelf Score.",
+    tag: "CRO",
+    date: "June 2026",
+    excerpt:
+      "Most D2C brands do not lose revenue because of one big problem. They lose it because of four small leaks that stack up across the funnel.",
+    sections: [
+      {
+        paragraphs: [
+          "Most D2C brands do not lose revenue because of one big problem. They lose it because of four small leaks that stack up across the funnel.",
+          "That is why benchmark pages are useful. They help brands see where they stand against top performers and identify which parts of the journey need the most attention.",
+        ],
+      },
+      {
+        heading: "Leak 1: Homepage confusion",
+        paragraphs: [
+          "A homepage has one job: help shoppers understand where to go next. If it is cluttered, vague, or overloaded with CTAs, visitors bounce before they ever explore products.",
+          "Benchmark-led CRO work often starts here because homepage friction affects the rest of the journey. Even a brand with strong traffic can underperform if the first impression does not guide shoppers clearly.",
+        ],
+      },
+      {
+        heading: "Leak 2: Product page drop-off",
+        paragraphs: [
+          "The product page is where intent turns into action. If shoppers cannot quickly understand the product, trust the brand, or feel confident about buying, they leave.",
+          "This is one of the clearest reasons benchmark scores vary. Better-performing brands tend to reduce hesitation with clearer product messaging, stronger trust signals, and more relevant content near the decision point.",
+        ],
+      },
+      {
+        heading: "Leak 3: Checkout friction",
+        paragraphs: [
+          "Checkout is where many stores lose the easiest money. A slow, confusing, or mobile-unfriendly flow creates unnecessary abandonment, especially when customers are already ready to buy.",
+          "Benchmark discussions around Indian D2C repeatedly point to funnel leaks in the middle and bottom of the journey rather than just traffic quality. That is why improving checkout experience often produces a faster lift than chasing more visitors.",
+        ],
+      },
+      {
+        heading: "Leak 4: No repeat path",
+        paragraphs: [
+          "A lot of brands measure the first order and stop there. But the strongest D2C businesses build a clear path for customers to return, which is why repeat rate and retention remain such important benchmark signals.",
+          "Recent benchmark reporting shows top Indian D2C brands consistently outperform the average in repeat purchase rate and customer lifetime value. That tells us the best stores are not just converting better once — they are creating a journey worth repeating.",
+        ],
+      },
+      {
+        heading: "Why these leaks matter",
+        paragraphs: [
+          "These four leaks are important because they compound. A weak homepage lowers product-page quality, a weak product page reduces checkout completion, and weak retention makes every acquisition more expensive.",
+          "That is also why benchmark scores are useful for prioritization. They help teams decide whether the biggest problem is discovery, conversion, or repeat purchase behavior, instead of guessing from isolated metrics.",
+        ],
+      },
+      {
+        heading: "What top performers do",
+        paragraphs: [
+          "Top performers do not try to fix everything at once. They focus on the parts of the journey where a small improvement creates a measurable difference in revenue and repeat behavior.",
+          "They also review performance continuously, rather than treating optimization as a one-time project. In benchmark terms, the winning brands are usually the ones that reduce friction step by step and keep tightening the middle of the funnel.",
+        ],
+      },
+    ],
+  },
 ];
