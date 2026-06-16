@@ -10,6 +10,7 @@ import BenchmarkReportPage from "./pages/BenchmarkReportPage";
 import MethodologyPage from "./pages/MethodologyPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import BlogsPage from "./pages/BlogsPage";
+import BlogPostPage from "./pages/BlogPostPage";
 
 function ScrollReset() {
   const { pathname } = useLocation();
@@ -32,6 +33,7 @@ export const router = createBrowserRouter([
       { path: "/methodology", Component: MethodologyPage },
       { path: "/privacy", Component: PrivacyPolicyPage },
       { path: "/blogs", Component: BlogsPage },
+      { path: "/blogs/:slug", Component: BlogPostPage },
     ],
   },
 ]);
