@@ -229,4 +229,53 @@ export const blogPosts: BlogPost[] = [
       },
     ],
   },
+  {
+    slug: "how-to-read-shelf-score-benchmark-data-shopify",
+    title: "How to Read the Shelf Score: What Benchmark Data Reveals About Your Shopify Store",
+    metaDescription:
+      "Learn how to interpret Shelf Score, what the benchmark data says about conversion, retention, and CRO, and how to spot your biggest revenue leaks.",
+    tag: "Shelf Score",
+    date: "June 2026",
+    excerpt:
+      "Most stores look at metrics in isolation. Shelf Score combines the signals that actually tell you whether a Shopify store is healthy or leaking revenue.",
+    sections: [
+      {
+        paragraphs: [
+          "Most stores look at metrics in isolation. Shelf Score is useful because it combines the signals that actually tell you whether a Shopify store is healthy or leaking revenue.",
+          "A benchmark is only valuable when it helps you interpret performance. Shelf Score does that by putting conversion, retention, and CRO into one view, so brands can see whether they are improving the whole journey or only one piece of it.",
+        ],
+      },
+      {
+        heading: "What Shelf Score measures",
+        paragraphs: [
+          "Shelf Score is designed to benchmark a store against leading Indian D2C brands, not just against its own historical numbers. That distinction matters because a store can grow month over month and still underperform relative to the market.",
+          "The benchmark data behind the score includes real Shopify transactions, category patterns, city-level behavior, and journey-level signals across Indian D2C brands. That means the score reflects how shoppers actually behave, not just how the dashboard looks.",
+        ],
+      },
+      {
+        heading: "Why benchmark context matters",
+        paragraphs: [
+          "A conversion rate by itself can be misleading. If your store converts at a decent rate but repeat purchases are weak, the business still has a profitability problem.",
+          "The same is true for traffic and AOV. A benchmark gives context by showing whether your store is above or below cohort performance, which makes it easier to prioritize fixes.",
+          "That is especially important in Indian D2C, where many brands still face low conversion and uneven retention behavior. The real question is not 'Did the number go up?' but 'How does it compare to what good looks like?'.",
+        ],
+      },
+      {
+        heading: "How to interpret the score",
+        paragraphs: [
+          "The simplest way to use Shelf Score is as a diagnostic layer. If the score is low, the store likely has one or more leaks in discovery, PDP performance, checkout flow, or retention.",
+          "If the score is in the middle, the store is probably converting some traffic but not efficiently enough to outperform the category. If the score is high, the store likely has a more balanced system where acquisition, conversion, and repeat behavior are working together.",
+          "That makes the score useful for both growth teams and founders. One group can use it to prioritize tests, while the other can use it to understand whether the business is becoming more efficient over time.",
+        ],
+      },
+      {
+        heading: "What the data suggests",
+        paragraphs: [
+          "The benchmark report shows a wide spread in customer value and repeat behavior. Top-performing brands outperform average brands significantly on repeat purchase rate and 12-month CLV, which means the score is not just measuring design quality — it is measuring commercial effectiveness.",
+          "The data also shows that many brands use only part of the available optimization surface, which is another reason a score is helpful. It can reveal whether a store is leaving value on the table simply because the journey is incomplete.",
+          "In that sense, Shelf Score is less like a report card and more like a roadmap. It tells you which part of the store needs attention first and which improvements are most likely to move revenue.",
+        ],
+      },
+    ],
+  },
 ];
