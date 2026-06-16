@@ -13,6 +13,10 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust Google Cloud Run's load balancer so req.ip reflects the real client IP,
+// not the shared proxy IP. Without this, all users share one rate-limit bucket.
+app.set('trust proxy', 1);
+
 // Import all company-related routes
 const companyRoutes = require('./api/companyRoutes');
 
