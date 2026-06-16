@@ -24,18 +24,20 @@ RUN npm run build
 
 
 # ── Stage 2: Production backend ───────────────────────────────────────────
-FROM node:20-alpine
+# node:20-slim (Debian/glibc) is required — @sparticuz/chromium bundles a Chromium binary
+# compiled for glibc. Alpine uses musl libc which is incompatible, causing ENOENT on spawn.
+FROM node:20-slim
 
 WORKDIR /app
 
-# System libs required by @sparticuz/chromium (does not need the chromium apk package —
-# sparticuz bundles its own Chromium binary compiled for Cloud Run / serverless environments)
-RUN apk add --no-cache \
-  nss \
-  freetype \
-  harfbuzz \
+# System libs required by the sparticuz Chromium binary on Debian
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  libnss3 \
+  libfreetype6 \
+  libharfbuzz0b \
   ca-certificates \
-  ttf-freefont
+  fonts-freefont-ttf \
+  && rm -rf /var/lib/apt/lists/*
 
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
