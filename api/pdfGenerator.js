@@ -51,7 +51,14 @@ const getExecutablePath = () => {
 const launchBrowser = () =>
   puppeteer.launch({
     executablePath: getExecutablePath(),
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-gpu',
+      '--no-zygote',        // required for Cloud Run — disables the zygote process that fails in restricted containers
+      '--single-process',   // required for Cloud Run — runs renderer in the main process instead of forking
+    ],
     headless: true,
   });
 
