@@ -6,6 +6,7 @@ import ShopifyPage from './pages/ShopifyPage';
 import ManualEntryPage from './pages/ManualEntryPage';
 import ResultsPage from './pages/ResultsPage';
 import ImportPage from './pages/ImportPage';
+import BlogsPage from './pages/BlogsPage';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/shopify" element={<ShopifyPage />} />
           <Route path="/manual" element={<ManualEntryPage />} />
           <Route path="/results" element={<ResultsPage />} />
+          <Route path="/blogs" element={<BlogsPage />} />
         </Routes>
       </Container>
     </div>

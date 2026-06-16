@@ -346,6 +346,11 @@ app.get('/sitemap.xml', (req, res) => {
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
+  <url>
+    <loc>https://benchmark.anphonic.ai/blogs</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
 </urlset>`);
 });
 
