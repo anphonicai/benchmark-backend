@@ -42,25 +42,28 @@ const LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 505.11 18
   </g>
 </svg>`;
 
-const getExecutablePath = () => {
-  if (process.env.PUPPETEER_EXECUTABLE_PATH) return process.env.PUPPETEER_EXECUTABLE_PATH;
-  if (process.platform === 'darwin') return '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-  return '/usr/bin/chromium-browser';
-};
+const launchBrowser = async () => {
+  // On Mac dev: use local Chrome via PUPPETEER_EXECUTABLE_PATH or the default app path
+  // On Cloud Run / Linux: use @sparticuz/chromium which is compiled for restricted container environments
+  if (process.platform === 'darwin') {
+    const executablePath =
+      process.env.PUPPETEER_EXECUTABLE_PATH ||
+      '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+    return puppeteer.launch({
+      executablePath,
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
+      headless: true,
+    });
+  }
 
-const launchBrowser = () =>
-  puppeteer.launch({
-    executablePath: getExecutablePath(),
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-gpu',
-      '--no-zygote',        // required for Cloud Run — disables the zygote process that fails in restricted containers
-      '--single-process',   // required for Cloud Run — runs renderer in the main process instead of forking
-    ],
-    headless: true,
+  const chromium = require('@sparticuz/chromium');
+  return puppeteer.launch({
+    args: chromium.args,
+    defaultViewport: chromium.defaultViewport,
+    executablePath: await chromium.executablePath(),
+    headless: chromium.headless,
   });
+};
 
 // Cache the shelf index PDF per process lifetime (it's static content)
 let shelfIndexCache = null;

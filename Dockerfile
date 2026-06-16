@@ -28,17 +28,16 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Chromium + required system libs for Puppeteer PDF generation
+# System libs required by @sparticuz/chromium (does not need the chromium apk package —
+# sparticuz bundles its own Chromium binary compiled for Cloud Run / serverless environments)
 RUN apk add --no-cache \
-  chromium \
   nss \
   freetype \
   harfbuzz \
   ca-certificates \
   ttf-freefont
 
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
 # Install backend production deps only
 COPY package.json package-lock.json ./
