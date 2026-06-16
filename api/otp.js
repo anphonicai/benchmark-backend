@@ -117,6 +117,7 @@ const sendScoreEmail = async (email, brandName, scoreResult, category) => {
       },
     ],
   });
+  console.log(`Score email sent to ${email} — score ${score}, brand: ${brandName}`);
 };
 
 module.exports = { sendOtp, verifyOtp, sendScoreEmail };
