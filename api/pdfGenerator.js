@@ -1,5 +1,6 @@
 const puppeteer = require('puppeteer-core');
 const path = require('path');
+const fs = require('fs');
 
 // Anphonic logo SVG — white text variant (no background rect, cls-2 flipped to #fff)
 const LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 505.11 180" style="height:36px;width:auto;display:block;">
@@ -59,16 +60,56 @@ let shelfIndexCache = null;
 
 const generateShelfIndexPdf = async () => {
   if (shelfIndexCache) return shelfIndexCache;
+
+  // Read the SVG and prepare it for safe inline injection:
+  // 1. Use the branded white-background version as requested
+  // 2. Strip <?xml?> declaration (invalid inside HTML)
+  // 3. Convert class-based fills → inline fill attributes so the page's own
+  //    CSS (which may define .cls-1 etc. differently) can't override logo colours
+  const logoSvgPath = path.join(
+    __dirname,
+    '../Multi-page client data form/src/imports/Anphonic-logo_with_bg_-_white.svg'
+  );
+  const logoSvgRaw = fs.readFileSync(logoSvgPath, 'utf8');
+  const logoSvgContent = logoSvgRaw
+    .replace(/<\?xml[^?]*\?>\s*/i, '')
+    .replace(/<defs>[\s\S]*?<\/defs>/i, '')   // remove <defs><style>…</style></defs>
+    .replace(/class="cls-1"/g, 'fill="#4ad3d3"')
+    .replace(/class="cls-2"/g, 'fill="#080a0a"')
+    .replace(/class="cls-3"/g, 'fill="#1c9393"')
+    .replace(/class="cls-4"/g, 'fill="#30b4b7"')
+    .replace(/class="cls-5"/g, 'fill="#ffffff"');
+
   const browser = await launchBrowser();
   try {
     const page = await browser.newPage();
     await page.setViewport({ width: 1280, height: 900 });
     const filePath = path.join(__dirname, '../client/shelf-index.html');
     await page.goto(`file://${filePath}`, { waitUntil: 'networkidle2', timeout: 30000 });
+
+    // Root-relative paths like /anphonic-logo.svg don't resolve under file://.
+    // Replace every broken <img src="/anphonic-logo.svg"> with the inline SVG,
+    // preserving the height/width styles from the original element.
+    // NOTE: logoSvgContent already has class-based fills converted to inline fills
+    // so the page's own CSS classes can't override the logo colours.
+    await page.evaluate((svgContent) => {
+      document.querySelectorAll('img[src="/anphonic-logo.svg"]').forEach((img) => {
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = svgContent;
+        const svg = wrapper.firstElementChild;
+        if (!svg) return;
+        svg.style.height = img.style.height || img.getAttribute('height') || '44px';
+        svg.style.width = img.style.width || img.getAttribute('width') || 'auto';
+        svg.style.display = 'block';
+        svg.removeAttribute('id');
+        img.parentNode.replaceChild(svg, img);
+      });
+    }, logoSvgContent);
+
     // Use screen media so the full document renders — the existing @media print CSS
-    // in shelf-index.html hides everything except the scorecard overlay, which is
-    // not what we want for the emailed copy of the full Shelf Index.
+    // hides everything except the scorecard overlay (used by the in-page Save as PDF button).
     await page.emulateMediaType('screen');
+
     const pdf = await page.pdf({
       format: 'A4',
       printBackground: true,

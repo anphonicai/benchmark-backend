@@ -263,6 +263,21 @@ Be concise. Explain metrics simply. Keep answers under 80 words. Don't use bulle
   }
 });
 
+// GET /preview/shelf-index-pdf — dev-only: generate and stream the Shelf Index PDF
+app.get('/preview/shelf-index-pdf', async (req, res) => {
+  if (process.env.NODE_ENV === 'production') return res.status(404).end();
+  try {
+    const { generateShelfIndexPdf } = require('./api/pdfGenerator');
+    const pdf = await generateShelfIndexPdf();
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'inline; filename="The-Shelf-Index-Edition-01.pdf"');
+    res.send(pdf);
+  } catch (err) {
+    console.error('Shelf Index PDF preview failed:', err.message);
+    res.status(500).send('PDF generation failed: ' + err.message);
+  }
+});
+
 // GET /preview/report — dev-only: render the benchmark report HTML with sample data
 // Visit http://localhost:3000/preview/report in a browser to see exactly what the PDF looks like
 app.get('/preview/report', (req, res) => {
