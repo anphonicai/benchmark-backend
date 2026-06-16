@@ -3,7 +3,7 @@ const rateLimit = require('express-rate-limit');
 const pool = require('../db/connection');
 const { computeShelfScore, computePercentile, computeVerdict, scoreBrand } = require('./scoring');
 const { fetchShopifyMetrics, fetchShopifyQL } = require('./shopify');
-const { sendOtp, verifyOtp } = require('./otp');
+const { sendOtp, verifyOtp, sendScoreEmail } = require('./otp');
 
 const router = express.Router();
 
@@ -451,6 +451,13 @@ router.post('/benchmark/manual', submissionLimiter, async (req, res) => {
         scoreResult.percentile,
       ]
     );
+
+    // Fire-and-forget: generate PDFs and email the score — does not block the response
+    if (contact_email) {
+      sendScoreEmail(contact_email, company_name, scoreResult, category).catch((err) =>
+        console.error('Score email failed for', contact_email, ':', err.message)
+      );
+    }
 
     return res.status(201).json({
       success: true,

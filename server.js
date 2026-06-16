@@ -263,6 +263,34 @@ Be concise. Explain metrics simply. Keep answers under 80 words. Don't use bulle
   }
 });
 
+// GET /preview/report — dev-only: render the benchmark report HTML with sample data
+// Visit http://localhost:3000/preview/report in a browser to see exactly what the PDF looks like
+app.get('/preview/report', (req, res) => {
+  if (process.env.NODE_ENV === 'production') return res.status(404).end();
+  const { buildReportHtml } = require('./api/pdfGenerator');
+  const sampleScore = {
+    shelf_score: 61,
+    percentile: 54,
+    verdict: {
+      headline: 'Your retention engine is in second gear.',
+      cohort_comparison: 'You\'re acquiring well, but customers aren\'t coming back at the rate top quartile brands manage. Three specific gaps drive most of the difference.',
+    },
+    category_used: 'food_beverage',
+    metrics_vs_cohort: [
+      { key: 'repeat_revenue_pct', label: 'Revenue from repeat customers', sublabel: '90 day window', unit: '%', you: 31, cohort_median: 40, top_quartile: 64, verdict: 'below' },
+      { key: 'time_to_2nd_order_days', label: 'Time to second order', sublabel: 'Median days', unit: ' days', you: 19, cohort_median: 21, top_quartile: 14, verdict: 'above' },
+    ],
+    gaps: [
+      { id: 'missing_loyalty_program', title: 'No loyalty program live.', revenue_at_stake_inr: 4260000, comparison: 'Top quartile F&B brands run Nector or POPcoins with redemption rates of 11–18%. Their repeat rate sits 14 points above cohort median.', cohort_data: 'Closing this is the single highest-leverage move for brands in your bracket.' },
+      { id: 'missing_post_purchase_upsell', title: 'No post-purchase upsell flow.', revenue_at_stake_inr: 1840000, comparison: 'Top quartile brands capture 14–22% of post-purchase visits with a one-click upsell. You show a static thank-you page.', cohort_data: 'Post-purchase AOV uplift averages 8–12% when implemented well.' },
+      { id: 'missing_whatsapp_optin', title: 'WhatsApp opt-in below cohort.', revenue_at_stake_inr: 1120000, comparison: 'Top quartile brands capture 45–60% of buyers into WhatsApp via checkout opt-in. WhatsApp drives 22% of repeat revenue at top quartile brands.', cohort_data: '' },
+    ],
+    total_revenue_at_stake_inr: 7220000,
+  };
+  const html = buildReportHtml({ scoreResult: sampleScore, brandName: 'Preview Brand', category: 'Food & Beverage' });
+  res.type('text/html').send(html);
+});
+
 // robots.txt
 app.get('/robots.txt', (req, res) => {
   res.type('text/plain');
