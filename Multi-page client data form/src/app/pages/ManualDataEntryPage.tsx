@@ -282,7 +282,7 @@ export default function ManualDataEntryPage() {
                   <option value="Wati">Wati</option>
                   <option value="Aisensy">Aisensy</option>
                   <option value="Bik/Doubletik">Bik/Doubletik</option>
-                  <option value="Kwick Engage">Kwick Engage</option>
+                  <option value="Kwik Engage">Kwik Engage</option>
                   <option value="Bitespeed">Bitespeed</option>
                   <option value="None">None</option>
                   <option value="Other">Other</option>

@@ -45,7 +45,7 @@ const GAP_META: Record<string, { action: string }> = {
   missing_reorder_page: { action: "Build a dedicated /reorder page or use Rebuy Smart Cart reorder flow to capture returning customers." },
   missing_loyalty_program: { action: "Set up Nector or POPcoins — most brands go live in under 3 weeks with significant repeat rate uplift." },
   missing_post_purchase_upsell: { action: "Add a one-click thank-you page offer via Rebuy, Zipify, or AfterSell. Start with your top-selling SKU." },
-  missing_whatsapp_optin: { action: "Launch a Day-21 WhatsApp Reorder URL flow via Interakt, Wati, or Kwick Engage. Single flow, big impact." },
+  missing_whatsapp_optin: { action: "Launch a Day-21 WhatsApp Reorder URL flow via Interakt, Wati, or Kwik Engage. Single flow, big impact." },
 };
 
 function getBarSegments(you: number, median: number, topQ: number, lowerIsBetter: boolean) {
