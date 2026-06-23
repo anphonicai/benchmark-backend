@@ -24,6 +24,7 @@ export default function BrandInfoPage() {
     shopifyUrl: "",
     category: "",
     ordersPerMonth: "",
+    showOnLeaderboard: false,
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -507,6 +508,7 @@ export default function BrandInfoPage() {
             </div>
 
           </div>
+
 
           {/* Privacy notice */}
           <div className="flex gap-3 p-4 bg-white border border-[#E8E3DA] rounded-xl">

@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS companies (
   cluster VARCHAR(100),
   category VARCHAR(100),
   shopify_store_url VARCHAR(255) UNIQUE,
+  show_on_leaderboard BOOLEAN DEFAULT false,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

@@ -11,6 +11,7 @@ import MethodologyPage from "./pages/MethodologyPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import BlogsPage from "./pages/BlogsPage";
 import BlogPostPage from "./pages/BlogPostPage";
+import SelfIndexPage from "./pages/SelfIndexPage";
 
 function ScrollReset() {
   const { pathname } = useLocation();
@@ -24,7 +25,8 @@ export const router = createBrowserRouter([
   {
     Component: ScrollReset,
     children: [
-      { path: "/", Component: HomePage },
+      { path: "/", Component: SelfIndexPage },
+      { path: "/benchmark", Component: HomePage },
       { path: "/brand-info", Component: BrandInfoPage },
       { path: "/connect-or-manual", Component: ConnectOrManualPage },
       { path: "/shopify-connect", Component: ShopifyConnectionPage },

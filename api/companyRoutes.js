@@ -425,30 +425,38 @@ router.post('/benchmark/manual', submissionLimiter, async (req, res) => {
     const metricsResult = await pool.query(
       `INSERT INTO metrics (
          company_id,
-         total_revenue,
-         total_orders,
-         total_customers,
-         repeat_customers,
          average_order_value,
-         repeat_rate,
          add_to_cart_rate,
-         revenue_from_repeat,
          shelf_score,
-         cohort_percentile
-       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+         cohort_percentile,
+         performance_verdict,
+         repeat_rate_90d_pct,
+         repeat_revenue_pct,
+         time_to_2nd_order_days,
+         rebuy_revenue_share_pct,
+         personalisation_aov_lift_pct,
+         orders_per_month,
+         loyalty,
+         post_purchase_upsell,
+         whatsapp_tool
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
        RETURNING id`,
       [
         companyId,
-        0,
-        0,
-        0,
-        0,
         parseNumber(req.body.average_order_value),
-        0,
         parseNumber(req.body.add_to_cart_rate),
-        0,
         scoreResult.shelf_score,
         scoreResult.percentile,
+        scoreResult.verdict?.tone || null,
+        parseNumber(repeat_rate_90d_pct),
+        parseNumber(repeat_revenue_pct),
+        parseNumber(time_to_2nd_order_days_median),
+        parseNumber(rebuy_revenue_share_pct),
+        parseNumber(personalisation_aov_lift_pct),
+        parseNumber(req.body.orders_per_month),
+        loyalty || null,
+        postPurchaseUpsell || null,
+        whatsappTool || null,
       ]
     );
 
@@ -567,6 +575,7 @@ router.post('/brand-info', submissionLimiter, async (req, res) => {
     shopifyUrl,
     category,
     ordersPerMonth,
+    showOnLeaderboard,
   } = req.body;
 
   // Validate required fields
@@ -652,26 +661,28 @@ router.post('/brand-info', submissionLimiter, async (req, res) => {
 
   try {
     const result = await pool.query(
-      `INSERT INTO companies (company_name, website, tier, contact_name, contact_email, phone, cluster, category, shopify_store_url)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      `INSERT INTO companies (company_name, website, tier, contact_name, contact_email, phone, cluster, category, shopify_store_url, show_on_leaderboard)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
        ON CONFLICT (shopify_store_url) DO UPDATE SET
          company_name = EXCLUDED.company_name,
          contact_name = EXCLUDED.contact_name,
          contact_email = EXCLUDED.contact_email,
          phone = EXCLUDED.phone,
          category = EXCLUDED.category,
+         show_on_leaderboard = EXCLUDED.show_on_leaderboard,
          updated_at = NOW()
        RETURNING id`,
       [
-        brandName, // company_name
-        null, // website
-        role || null, // tier (storing role here temporarily)
-        fullName || null, // contact_name
-        email, // contact_email
-        phone || null, // phone
-        null, // cluster
-        category || null, // category
-        shopifyUrl || null, // shopify_store_url
+        brandName,
+        null,
+        role || null,
+        fullName || null,
+        email,
+        phone || null,
+        null,
+        category || null,
+        shopifyUrl || null,
+        showOnLeaderboard === true || showOnLeaderboard === 'true',
       ]
     );
 
@@ -797,6 +808,57 @@ router.get('/validate-shopify-url', async (req, res) => {
       return res.status(200).json({ success: false, isShopify: false, message: 'Store URL timed out. Please check it is live.' });
     }
     return res.status(200).json({ success: false, isShopify: false, message: 'Could not reach this URL. Please verify it is correct and live.' });
+  }
+});
+
+// GET /api/leaderboard — public, no auth required
+// Returns brands ranked by shelf_score (latest metric per company).
+// ?category=food_beverage to filter by category.
+router.get('/leaderboard', async (req, res) => {
+  const { category } = req.query;
+
+  try {
+    const values = [];
+    const categoryFilter = category
+      ? (() => { values.push(`%${category.toLowerCase()}%`); return `AND LOWER(c.category) LIKE $${values.length}`; })()
+      : '';
+
+    const result = await pool.query(
+      `WITH latest_metrics AS (
+         SELECT DISTINCT ON (company_id)
+           company_id,
+           shelf_score,
+           cohort_percentile,
+           performance_verdict,
+           created_at
+         FROM metrics
+         WHERE shelf_score IS NOT NULL
+         ORDER BY company_id, created_at DESC
+       )
+       SELECT
+         RANK() OVER (ORDER BY lm.shelf_score DESC) AS rank,
+         c.id AS company_id,
+         CASE WHEN c.show_on_leaderboard THEN c.company_name ELSE NULL END AS display_name,
+         c.category,
+         lm.shelf_score,
+         lm.cohort_percentile,
+         lm.performance_verdict
+       FROM latest_metrics lm
+       INNER JOIN companies c ON c.id = lm.company_id
+       WHERE lm.shelf_score IS NOT NULL
+       ${categoryFilter}
+       ORDER BY lm.shelf_score DESC`,
+      values
+    );
+
+    return res.status(200).json({
+      success: true,
+      total_brands: result.rowCount,
+      brands: result.rows,
+    });
+  } catch (error) {
+    console.error('Error fetching leaderboard:', error.message);
+    return res.status(500).json({ success: false, message: 'Failed to load leaderboard.' });
   }
 });
 
