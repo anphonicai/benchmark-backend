@@ -241,8 +241,8 @@ export default function SelfIndexPage() {
     window.open("/shelf-index.html", "_blank");
   };
 
-  const line1 = ["Where", "Indian", "D2C", "brands", "are", "compounding"];
-  const line2 = ["—", "and", "where", "they're", "still", "leaving", "money", "on", "the", "table."];
+  const line1 = ["Shelf", "Life:"];
+  const line2 = ["The", "State", "of", "Indian", "D2C"];
 
   return (
     <div className="min-h-screen overflow-x-hidden" style={{ backgroundColor: CREAM, fontFamily: "'DM Sans', sans-serif", color: NAVY }}>
@@ -331,7 +331,7 @@ export default function SelfIndexPage() {
                 <span className="block overflow-hidden pb-1.5">
                   {line2.map((word, i) => (
                     <span key={i} className="w inline-block mr-[0.22em]"
-                      style={{ color: i === 0 ? "rgba(10,31,61,0.35)" : TEAL, fontStyle: "italic" }}>
+                      style={{ color: TEAL, fontStyle: "italic" }}>
                       {word}
                     </span>
                   ))}
