@@ -862,4 +862,60 @@ router.get('/leaderboard', async (req, res) => {
   }
 });
 
+// ── POST /api/companies/shelf-index-lead ─────────────────────────────────────
+// Saves a lead from the Shelf Index report unlock modal.
+const shelfLeadLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10, standardHeaders: true, legacyHeaders: false });
+
+router.post('/shelf-index-lead', shelfLeadLimiter, async (req, res) => {
+  const { fullName, email, brandUrl, phone } = req.body || {};
+
+  // ── Validate ──────────────────────────────────────────────────────────────
+  const errs = {};
+
+  if (!fullName || typeof fullName !== 'string' || !fullName.trim()) {
+    errs.fullName = 'Full name is required.';
+  } else if (!/^[a-zA-Z\s.\-']{2,100}$/.test(fullName.trim())) {
+    errs.fullName = 'Name should only contain letters, spaces, hyphens or apostrophes (2–100 chars).';
+  }
+
+  const emailTrimmed = (email || '').trim();
+  if (!emailTrimmed) {
+    errs.email = 'Email is required.';
+  } else if (!/^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(emailTrimmed)) {
+    errs.email = 'Please enter a valid email address.';
+  }
+
+  const urlTrimmed = (brandUrl || '').trim();
+  if (!urlTrimmed) {
+    errs.brandUrl = 'Brand URL is required.';
+  } else {
+    const normalized = urlTrimmed.startsWith('http') ? urlTrimmed : `https://${urlTrimmed}`;
+    try { new URL(normalized); } catch { errs.brandUrl = 'Please enter a valid URL (e.g. yourbrand.com).'; }
+  }
+
+  const digits = (phone || '').replace(/\D/g, '');
+  const core = digits.length === 12 && digits.startsWith('91') ? digits.slice(2) : digits;
+  if (!core || !/^[6-9]\d{9}$/.test(core)) {
+    errs.phone = 'Please enter a valid 10-digit Indian mobile number.';
+  }
+
+  if (Object.keys(errs).length > 0) {
+    return res.status(400).json({ success: false, errors: errs });
+  }
+
+  // ── Persist ───────────────────────────────────────────────────────────────
+  try {
+    await pool.query(
+      `INSERT INTO shelf_index_leads (full_name, email, brand_url, phone)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT DO NOTHING`,
+      [fullName.trim(), emailTrimmed, urlTrimmed, core]
+    );
+    return res.status(200).json({ success: true });
+  } catch (err) {
+    console.error('shelf-index-lead error:', err.message);
+    return res.status(500).json({ success: false, message: 'Could not save your details. Please try again.' });
+  }
+});
+
 module.exports = router;

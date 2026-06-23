@@ -385,9 +385,32 @@ if (fs.existsSync(path.join(frontendBuildPath, 'index.html'))) {
   });
 }
 
+// Run idempotent migrations on startup
+async function runStartupMigrations() {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS shelf_index_leads (
+        id         SERIAL PRIMARY KEY,
+        full_name  VARCHAR(200) NOT NULL,
+        email      VARCHAR(255) NOT NULL,
+        brand_url  VARCHAR(500) NOT NULL,
+        phone      VARCHAR(20)  NOT NULL,
+        source     VARCHAR(100) DEFAULT 'shelf-index-page',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_shelf_leads_email   ON shelf_index_leads(email);
+      CREATE INDEX IF NOT EXISTS idx_shelf_leads_created ON shelf_index_leads(created_at);
+    `);
+    console.log('Startup migrations: shelf_index_leads table ready.');
+  } catch (err) {
+    console.error('Startup migration error:', err.message);
+  }
+}
+
 // Start the application
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`Server running on http://localhost:${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`Connected to database: ${process.env.DB_NAME}`);
+  await runStartupMigrations();
 });

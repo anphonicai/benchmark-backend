@@ -185,18 +185,60 @@ export default function SelfIndexPage() {
   const handleSubmit = async (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     const errs: Record<string, string> = {};
-    if (!form.fullName.trim()) errs.fullName = "Full name is required.";
-    if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) errs.email = "Valid email is required.";
-    if (!form.brandUrl.trim()) errs.brandUrl = "Brand URL is required.";
-    const phone = form.phone.replace(/\D/g, "");
-    const phoneCore = phone.length === 12 && phone.startsWith("91") ? phone.slice(2) : phone;
-    if (!phone || !/^[6-9]\d{9}$/.test(phoneCore)) errs.phone = "Enter a valid 10-digit Indian mobile number.";
+
+    const name = form.fullName.trim();
+    if (!name) {
+      errs.fullName = "Full name is required.";
+    } else if (!/^[a-zA-Z\s.\-']{2,100}$/.test(name)) {
+      errs.fullName = "Name should only contain letters, spaces, or hyphens (2–100 chars).";
+    }
+
+    const email = form.email.trim();
+    if (!email) {
+      errs.email = "Email is required.";
+    } else if (!/^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(email)) {
+      errs.email = "Please enter a valid email address (e.g. you@yourbrand.com).";
+    }
+
+    const rawUrl = form.brandUrl.trim();
+    if (!rawUrl) {
+      errs.brandUrl = "Brand URL is required.";
+    } else {
+      const normalised = rawUrl.startsWith("http") ? rawUrl : `https://${rawUrl}`;
+      try { new URL(normalised); }
+      catch { errs.brandUrl = "Please enter a valid URL (e.g. yourbrand.com)."; }
+    }
+
+    const digits = form.phone.replace(/\D/g, "");
+    const phoneCore = digits.length === 12 && digits.startsWith("91") ? digits.slice(2) : digits;
+    if (!digits) {
+      errs.phone = "Phone number is required.";
+    } else if (!/^[6-9]\d{9}$/.test(phoneCore)) {
+      errs.phone = "Enter a valid 10-digit Indian mobile number starting with 6–9.";
+    } else if (new Set(phoneCore.split("")).size < 4) {
+      errs.phone = "Please enter a real mobile number.";
+    }
+
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
+
     setSubmitting(true);
-    fetch("/api/companies/shelf-index-lead", {
-      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form),
-    }).catch(() => {});
-    setTimeout(() => { setSubmitting(false); setShowModal(false); window.open("/shelf-index.html", "_blank"); }, 600);
+    try {
+      const res = await fetch("/api/companies/shelf-index-lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fullName: name, email, brandUrl: rawUrl, phone: phoneCore }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok && data.errors) {
+        setErrors(data.errors);
+        setSubmitting(false);
+        return;
+      }
+    } catch { /* fire-and-forget — still open report on network error */ }
+
+    setSubmitting(false);
+    setShowModal(false);
+    window.open("/shelf-index.html", "_blank");
   };
 
   const line1 = ["Where", "Indian", "D2C", "brands", "are", "compounding"];
