@@ -25,8 +25,8 @@ export const router = createBrowserRouter([
   {
     Component: ScrollReset,
     children: [
-      { path: "/", Component: SelfIndexPage },
-      { path: "/benchmark", Component: HomePage },
+      { path: "/", Component: HomePage },
+      { path: "/selfindexhomepage", Component: SelfIndexPage },
       { path: "/brand-info", Component: BrandInfoPage },
       { path: "/connect-or-manual", Component: ConnectOrManualPage },
       { path: "/shopify-connect", Component: ShopifyConnectionPage },
