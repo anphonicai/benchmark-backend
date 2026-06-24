@@ -571,7 +571,7 @@ export default function SelfIndexPage() {
                   <MagneticBtn
                     className="inline-flex items-center gap-3 px-8 py-4 rounded-xl text-sm font-semibold text-white cursor-pointer"
                     style={{ backgroundColor: TEAL, boxShadow: `0 4px 24px ${TEAL}50` }}
-                    onClick={() => navigate("/benchmark")}
+                    onClick={() => navigate("/")}
                   >
                     Get Full Access
                     <ArrowRight className="w-4 h-4" />
