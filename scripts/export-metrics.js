@@ -5,6 +5,8 @@
 // Usage:  node scripts/export-metrics.js
 // Cron:   every 30 min — see crontab instructions at the bottom of this file
 
+// Always resolve .env relative to repo root regardless of cwd
+process.chdir(require('path').join(__dirname, '..'));
 require('dotenv').config();
 const { spawn }  = require('child_process');
 const path       = require('path');
